@@ -5,7 +5,7 @@ output:
     theme: spacelab
     toc: no
 ---
-# **number of cross overs per chromosome 1 - arabidopsis**
+# **number of cross overs per chromosome 2 - arabidopsis**
 
 Load libraries and the data
 ```{r setup, include=FALSE}
@@ -40,7 +40,7 @@ Supplemental information from above manuscript is downloaded and is in the follo
 #### box plot of number of cross overs in progeny of different parental crosses of arabidopsis
 
 ```{r boxplot-pacbio, echo=FALSE, fig.width=12, fig.height=4}
-table = read.delim(file="chromosome_1_crosses.txt")
+table = read.delim(file="chromosome_2_crosses.txt")
 table$X <- NULL
 melted = melt(table)
 ggplot(melted, aes(x=variable, y=value, fill=variable)) + geom_boxplot() +
@@ -66,8 +66,8 @@ den2df <- function(vector){
   df <- data.frame(x=den$x, y=den$y)
 }
 
-chr = 1 # chr number
-size = 30427671 # bp
+chr = 2 # chr number
+size = 19698289 # bp
 # empty data frame to store parameters for fitted gamma distribtuion
 table1 <- data.frame(t(rep(NA,6)))
 names(table1) <- c("chr", "size", "sample", "num_plants", "shape", "rate")
@@ -107,7 +107,7 @@ for (a in colnames(table) ) {
 
 do.call(grid.arrange, c(P, nrow = 6, ncol= 3))
 
-write.table(table1, file="chr1_gamma_params.txt", sep="\t", row.names = FALSE, quote=FALSE)
+write.table(table1, file="chr2_gamma_params.txt", sep="\t", row.names = FALSE, quote=FALSE)
 ```
 
 
