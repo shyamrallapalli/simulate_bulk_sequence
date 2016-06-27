@@ -21,6 +21,7 @@ library(reshape2)
 
 ## cusotom ggplot theme
 source("~/git-hub-repos/shyamrallapalli/mutations_hts_noref/lib/ggplot_theme.R")
+source("~/git-hub-repos/shyamrallapalli/mutations_hts_noref/lib/qqline2.R")
 
 ```
 
@@ -108,6 +109,75 @@ for (a in colnames(table) ) {
 do.call(grid.arrange, c(P, nrow = 6, ncol= 3))
 
 write.table(table1, file="chr5_gamma_params.txt", sep="\t", row.names = FALSE, quote=FALSE)
+```
+
+
+...
+
+
+...
+
+
+#### fitting distribtuion to number of cross overs per chromosome
+
+```{r alldata-distr, echo=FALSE, fig.width=12, fig.height=6}
+
+# empty data frame to store parameters for fitted gamma distribtuion
+table2 <- data.frame(t(rep(NA,8)))
+names(table2) <- c("chr", "size", "num_plants", "shape", "rate", "lambda", "size", "mu")
+melted = na.omit(melted)
+vect = melted$value
+inputdf = den2df(vect)
+len = length(vect)
+fitgam <- fitdist(vect, "gamma",method = "mme")
+gam = rgamma(len, shape=fitgam$estimate['shape'], rate=fitgam$estimate['rate'])
+gamdf = den2df(round(gam))
+table2[1,] <- c(chr, size, len, fitgam$estimate['shape'], fitgam$estimate['rate'], NA, NA, NA)
+  
+fitpois <- fitdist(vect, "pois",method = "mme")
+pois = rpois(len, fitpois$estimate['lambda'])
+poisdf = den2df(pois)
+table2[2,] <- c(chr, size, len, NA, NA, fitpois$estimate['lambda'], NA, NA)
+
+fitnb <- fitdist(vect, "nbinom")
+nb = rnbinom(len, size=fitnb$estimate['size'], mu=fitnb$estimate['mu'])
+nbdf = den2df(nb)
+table2[3,] <- c(chr, size, len, NA, NA, NA, fitnb$estimate['size'], fitnb$estimate['mu'])
+
+ggplot() + geom_line(data=inputdf, aes(x=x, y=y, colour="raw data"), size=1) +
+  geom_line(data=gamdf, aes(x=x, y=y, colour="gamma"), size=1) +
+  geom_line(data=poisdf, aes(x=x, y=y, colour="poisson"), size=1) +
+  geom_line(data=nbdf, aes(x=x, y=y, colour="nbinom"), size=1) +
+  scale_y_sqrt() + mytheme + theme(legend.position=c(0.73,0.83)) +
+  labs(x =NULL, y=NULL, main=NULL)
+
+```
+
+
+```{r data_table, echo=FALSE, fig.width=8, fig.height=4}
+print(table2, row.names = FALSE, quote=FALSE)
+
+```
+
+
+### qq plots using fitted distributions
+
+```{r qqplot, echo=FALSE, fig.width=12, fig.height=4}
+
+par(mfrow=c(1,3), mar=c(5,5,1,0.5))
+V=qqplot(vect, round(gam), xlab="cross overs", ylab="gamma fit", cex.lab=1.5, cex.axis=1.5)
+qqline2(vect, round(gam))
+k=lm(V$y ~ V$x)
+leg_r2(k)
+V=qqplot(vect, pois, xlab="cross overs", ylab="poisson fit", cex.lab=1.5, cex.axis=1.5)
+qqline2(vect, pois)
+k=lm(V$y ~ V$x)
+leg_r2(k)
+V=qqplot(vect, nb, xlab="cross overs", ylab="neg binomial fit", cex.lab=1.5, cex.axis=1.5)
+qqline2(vect, nb)
+k=lm(V$y ~ V$x)
+leg_r2(k)
+
 ```
 
 
