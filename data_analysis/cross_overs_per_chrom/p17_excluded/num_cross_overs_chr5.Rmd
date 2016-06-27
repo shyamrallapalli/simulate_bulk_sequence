@@ -1,0 +1,186 @@
+---
+output:
+  html_document:
+    fig_caption: yes
+    theme: spacelab
+    toc: no
+---
+# **number of cross overs per chromosome 5 - arabidopsis**
+
+Load libraries and the data
+```{r setup, include=FALSE}
+# load the required libraries and functions
+library(knitr)
+library(markdown)
+#opts_chunk$set(dev = 'pdf')
+library(grid)
+library(gridExtra)
+library(ggplot2)
+library(MASS)
+library(reshape2)
+
+## cusotom ggplot theme
+source("~/git-hub-repos/shyamrallapalli/mutations_hts_noref/lib/ggplot_theme.R")
+source("~/git-hub-repos/shyamrallapalli/mutations_hts_noref/lib/qqline2.R")
+
+```
+
+...     
+
+...  		
+
+Arabidopsis recombination landscape data is published in the following manuscript   
+[http://www.nature.com/hdy/journal/v108/n4/full/hdy201195a.html](http://www.nature.com/hdy/journal/v108/n4/full/hdy201195a.html).
+
+...
+
+Supplemental information from above manuscript is downloaded and is in the following folder [recombination_landscape](../recombination_landscape)
+
+...
+
+#### box plot of number of cross overs in progeny of different parental crosses of arabidopsis
+
+```{r boxplot-pacbio, echo=FALSE, fig.width=12, fig.height=4}
+table = read.delim(file="../chromosome_5_crosses.txt")
+table$P17 = NULL
+table$X <- NULL
+melted = melt(table)
+ggplot(melted, aes(x=variable, y=value, fill=variable)) + geom_boxplot() +
+labs(x ="crosses", y="num crossovers", main=NULL) + mytheme + theme(legend.position="none")
+
+```
+
+
+...
+
+
+...
+
+
+#### fitting distribtuion to number of cross overs per chromosome
+
+```{r fit-distr, echo=FALSE, fig.width=12, fig.height=24}
+library(fitdistrplus)
+
+# small function to make density data frame from vector
+den2df <- function(vector){
+  den <- density(vector)
+  df <- data.frame(x=den$x, y=den$y)
+}
+
+chr = 5 # chr number
+size = 26975502 # bp
+# empty data frame to store parameters for fitted gamma distribtuion
+table1 <- data.frame(t(rep(NA,6)))
+names(table1) <- c("chr", "size", "sample", "num_plants", "shape", "rate")
+rows = 1
+P <- list()
+for (a in colnames(table) ) {
+  vect = as.numeric(na.omit(table[,a]))
+  inputdf = den2df(vect)
+  len = length(vect)
+  fitgam <- fitdist(vect, "gamma", method = "mme")
+  gam = rgamma(len, shape=fitgam$estimate['shape'], rate=fitgam$estimate['rate'])
+  gamdf = den2df(round(gam))
+  table1[rows,] <- c(chr, size, a, len, fitgam$estimate['shape'], fitgam$estimate['rate'])
+  
+  #fitgeom <- fitdist(vect, "geom", method = "mme")
+  #geom = rgeom(len, fitgeom$estimate)
+  #geomdf = den2df(round(geom))
+  #geom_line(data=geomdf,aes(x=x, y=y, colour="geometric"), size=1)
+
+  fitpois <- fitdist(vect, "pois", method = "mme")
+  pois = rpois(len, fitpois$estimate)
+  poisdf = den2df(pois)
+  
+  fitnb <- fitdist(vect, "nbinom")
+  nb = rnbinom(len, size=fitnb$estimate['size'], mu=fitnb$estimate['mu'])
+  nbdf = den2df(nb)
+
+  each_plot = ggplot() + geom_line(data=inputdf, aes(x=x, y=y, colour="raw data"), size=1) +
+    geom_line(data=gamdf, aes(x=x, y=y, colour="gamma"), size=1) +
+    geom_line(data=poisdf, aes(x=x, y=y, colour="poisson"), size=1) +
+    geom_line(data=nbdf, aes(x=x, y=y, colour="nbinom"), size=1) +
+    scale_y_sqrt() + mytheme + theme(legend.position=c(0.73,0.83)) +
+    labs(x =NULL, y=NULL, main=NULL)
+  P <- c(P, list(each_plot))
+  rows = rows + 1
+}
+
+do.call(grid.arrange, c(P, nrow = 6, ncol= 3))
+
+write.table(table1, file="chr5_gamma_params.txt", sep="\t", row.names = FALSE, quote=FALSE)
+```
+
+
+...
+
+
+...
+
+
+#### fitting distribtuion to number of cross overs per chromosome
+
+```{r alldata-distr, echo=FALSE, fig.width=12, fig.height=6}
+
+# empty data frame to store parameters for fitted gamma distribtuion
+table2 <- data.frame(t(rep(NA,9)))
+names(table2) <- c("chr", "length", "num_plants", "distri", "shape", "rate", "lambda", "size", "mu")
+melted = na.omit(melted)
+vect = melted$value
+inputdf = den2df(vect)
+len = length(vect)
+fitgam <- fitdist(vect, "gamma", method = "mme")
+gam = rgamma(len, shape=fitgam$estimate['shape'], rate=fitgam$estimate['rate'])
+gamdf = den2df(round(gam))
+table2[1,] <- c(chr, size, len, "gamma", fitgam$estimate['shape'], fitgam$estimate['rate'], NA, NA, NA)
+  
+fitpois <- fitdist(vect, "pois", method = "mme")
+pois = rpois(len, fitpois$estimate['lambda'])
+poisdf = den2df(pois)
+table2[2,] <- c(chr, size, len, "pois",NA, NA, fitpois$estimate['lambda'], NA, NA)
+
+fitnb <- fitdist(vect, "nbinom")
+nb = rnbinom(len, size=fitnb$estimate['size'], mu=fitnb$estimate['mu'])
+nbdf = den2df(nb)
+table2[3,] <- c(chr, size, len, "nbinom", NA, NA, NA, fitnb$estimate['size'], fitnb$estimate['mu'])
+
+ggplot() + geom_line(data=inputdf, aes(x=x, y=y, colour="raw data"), size=1) +
+  geom_line(data=gamdf, aes(x=x, y=y, colour="gamma"), size=1) +
+  geom_line(data=poisdf, aes(x=x, y=y, colour="poisson"), size=1) +
+  geom_line(data=nbdf, aes(x=x, y=y, colour="nbinom"), size=1) +
+  scale_y_sqrt() + mytheme + theme(legend.position=c(0.73,0.83)) +
+  labs(x =NULL, y=NULL, main=NULL)
+
+write.table(table2, file="pooled_distri_params.txt", sep="\t", row.names = FALSE, quote=FALSE, append = TRUE, col.names = FALSE)
+```
+
+
+...
+
+
+...
+
+
+### qq plots using fitted distributions
+
+```{r qqplot, echo=FALSE, fig.width=12, fig.height=4}
+
+par(mfrow=c(1,3), mar=c(5,5,1,0.5))
+V=qqplot(vect, round(gam), xlab="cross overs", ylab="gamma fit", cex.lab=1.5, cex.axis=1.5)
+qqline2(vect, round(gam))
+k=lm(V$y ~ V$x)
+leg_r2(k)
+V=qqplot(vect, pois, xlab="cross overs", ylab="poisson fit", cex.lab=1.5, cex.axis=1.5)
+qqline2(vect, pois)
+k=lm(V$y ~ V$x)
+leg_r2(k)
+V=qqplot(vect, nb, xlab="cross overs", ylab="neg binomial fit", cex.lab=1.5, cex.axis=1.5)
+qqline2(vect, nb)
+k=lm(V$y ~ V$x)
+leg_r2(k)
+
+```
+
+
+
