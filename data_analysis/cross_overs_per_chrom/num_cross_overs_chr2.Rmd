@@ -78,17 +78,17 @@ for (a in colnames(table) ) {
   vect = as.numeric(na.omit(table[,a]))
   inputdf = den2df(vect)
   len = length(vect)
-  fitgam <- fitdist(vect, "gamma",method = "mme")
+  fitgam <- fitdist(vect, "gamma", method = "mme")
   gam = rgamma(len, shape=fitgam$estimate['shape'], rate=fitgam$estimate['rate'])
   gamdf = den2df(round(gam))
   table1[rows,] <- c(chr, size, a, len, fitgam$estimate['shape'], fitgam$estimate['rate'])
   
-  #fitgeom <- fitdist(vect, "geom",method = "mme")
+  #fitgeom <- fitdist(vect, "geom", method = "mme")
   #geom = rgeom(len, fitgeom$estimate)
   #geomdf = den2df(round(geom))
   #geom_line(data=geomdf,aes(x=x, y=y, colour="geometric"), size=1)
 
-  fitpois <- fitdist(vect, "pois",method = "mme")
+  fitpois <- fitdist(vect, "pois", method = "mme")
   pois = rpois(len, fitpois$estimate)
   poisdf = den2df(pois)
   
@@ -123,26 +123,26 @@ write.table(table1, file="chr2_gamma_params.txt", sep="\t", row.names = FALSE, q
 ```{r alldata-distr, echo=FALSE, fig.width=12, fig.height=6}
 
 # empty data frame to store parameters for fitted gamma distribtuion
-table2 <- data.frame(t(rep(NA,8)))
-names(table2) <- c("chr", "size", "num_plants", "shape", "rate", "lambda", "size", "mu")
+table2 <- data.frame(t(rep(NA,9)))
+names(table2) <- c("chr", "length", "num_plants", "distri", "shape", "rate", "lambda", "size", "mu")
 melted = na.omit(melted)
 vect = melted$value
 inputdf = den2df(vect)
 len = length(vect)
-fitgam <- fitdist(vect, "gamma",method = "mme")
+fitgam <- fitdist(vect, "gamma", method = "mme")
 gam = rgamma(len, shape=fitgam$estimate['shape'], rate=fitgam$estimate['rate'])
 gamdf = den2df(round(gam))
-table2[1,] <- c(chr, size, len, fitgam$estimate['shape'], fitgam$estimate['rate'], NA, NA, NA)
+table2[1,] <- c(chr, size, len, "gamma", fitgam$estimate['shape'], fitgam$estimate['rate'], NA, NA, NA)
   
-fitpois <- fitdist(vect, "pois",method = "mme")
+fitpois <- fitdist(vect, "pois", method = "mme")
 pois = rpois(len, fitpois$estimate['lambda'])
 poisdf = den2df(pois)
-table2[2,] <- c(chr, size, len, NA, NA, fitpois$estimate['lambda'], NA, NA)
+table2[2,] <- c(chr, size, len, "pois",NA, NA, fitpois$estimate['lambda'], NA, NA)
 
 fitnb <- fitdist(vect, "nbinom")
 nb = rnbinom(len, size=fitnb$estimate['size'], mu=fitnb$estimate['mu'])
 nbdf = den2df(nb)
-table2[3,] <- c(chr, size, len, NA, NA, NA, fitnb$estimate['size'], fitnb$estimate['mu'])
+table2[3,] <- c(chr, size, len, "nbinom", NA, NA, NA, fitnb$estimate['size'], fitnb$estimate['mu'])
 
 ggplot() + geom_line(data=inputdf, aes(x=x, y=y, colour="raw data"), size=1) +
   geom_line(data=gamdf, aes(x=x, y=y, colour="gamma"), size=1) +
@@ -151,13 +151,14 @@ ggplot() + geom_line(data=inputdf, aes(x=x, y=y, colour="raw data"), size=1) +
   scale_y_sqrt() + mytheme + theme(legend.position=c(0.73,0.83)) +
   labs(x =NULL, y=NULL, main=NULL)
 
+write.table(table2, file="pooled_distri_params.txt", sep="\t", row.names = FALSE, quote=FALSE, append = TRUE, col.names = FALSE)
 ```
 
 
-```{r data_table, echo=FALSE, fig.width=8, fig.height=4}
-print(table2, row.names = FALSE, quote=FALSE)
+...
 
-```
+
+...
 
 
 ### qq plots using fitted distributions
