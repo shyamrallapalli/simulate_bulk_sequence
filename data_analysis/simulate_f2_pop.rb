@@ -12,8 +12,8 @@ else
 end
 
 pars = YAML.load_file("#{indir}/configs.yml")
-in_vcf = pars['in_vcf']
-xovers = pars['xovers']
+in_vcf = File.expand_path pars['in_vcf']
+xover_file = File.expand_path pars['xovers']
 progeny = pars['progeny']
 chrs = pars['chrs']
 recomb_rate = 0.3
@@ -30,6 +30,13 @@ File.open(in_vcf, 'r').each do |line|
    elsif info["HOM"] == "1"
       markers[chrom][pos] = "HOM"
    end
+end
+
+xovers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash of cross over position and prop
+File.open(xover_file, 'r').each do |line|
+  info = line.split(/\t/)
+  next if info[1] !~ /^\d/
+  xovers[info[0]][info[1].to_f.ceil] = info[2].to_i
 end
 
 def recombinant_progeny (chrs, progeny_num)
@@ -57,8 +64,23 @@ def recombinant_progeny (chrs, progeny_num)
   chrs
 end
 
-def recombination_positions (prob_hash, number)
-  pos_pool = Pickup.new(prob_hash, uniq: true)
+def counts_to_prop(hash)
+  chrom = hash.keys[0]
+  if hash[chrom].values[0].class == Fixnum
+    hash.each_key do | chr |
+      sum = hash[chr].values.inject(0, :+)
+      hash[chr].each_key do | pos |
+        hash[chr][pos] = hash[chr][pos].to_f/sum
+      end
+    end
+  end
+  hash
+end
+
+def recombination_positions (prop_hash, number)
+  pos_pool = Pickup.new(prop_hash, uniq: true)
   pos_pool.pick(number)
 end
 
+# xovers = counts_to_prop(xovers)
+# testnum = recombination_positions(xovers[xovers.keys[0]], 3)
