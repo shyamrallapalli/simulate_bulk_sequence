@@ -1,0 +1,243 @@
+---
+output:
+  html_document:
+    fig_caption: yes
+    theme: spacelab
+    toc: no
+---
+# **cross overs positions individual chromosomes - arabidopsis**
+
+Load libraries and the data
+```{r setup, include=FALSE}
+# load the required libraries and functions
+library(knitr)
+library(markdown)
+#opts_chunk$set(dev = 'pdf')
+library(grid)
+library(gridExtra)
+library(ggplot2)
+library(MASS)
+library(reshape2)
+library(fitdistrplus)
+
+## cusotom ggplot theme
+source("~/git-hub-repos/shyamrallapalli/mutations_hts_noref/lib/ggplot_theme.R")
+source("~/git-hub-repos/shyamrallapalli/mutations_hts_noref/lib/qqline2.R")
+
+```
+
+...     
+
+...  		
+
+Arabidopsis recombination landscape data is published in the following manuscript   
+[http://www.nature.com/hdy/journal/v108/n4/full/hdy201195a.html](http://www.nature.com/hdy/journal/v108/n4/full/hdy201195a.html).
+
+...
+
+Supplemental information from above manuscript is downloaded and is in the following folder [recombination_landscape](../recombination_landscape)
+
+...
+
+...
+
+
+#### plotting cross overs positions chromosome 1
+
+```{r chr1, echo=FALSE, fig.width=12, fig.height=10}
+table = na.omit(read.delim(file="chromosome_1_crossover_positions.txt"))
+
+p1 = ggplot() + geom_line(data=table, aes(x=mid.point, y=XOs, colour = Cross)) +
+  labs(x ="position in bp", y="num crossovers", main=NULL) + mytheme
+
+new_table <- data.frame(t(rep(NA,2)))
+names(new_table) <- c("pos", "count")
+
+num = 1
+for (i in 1:nrow(table)) {
+  if (is.element(table$mid.point[i], new_table$pos)){
+    index = match(table$mid.point[i], new_table$pos)
+    new_table$count[index] = new_table$count[index] + table$XOs[i]
+  } else {
+    new_table[num,] <- c(table$mid.point[i], table$XOs[i])
+    num = num + 1
+  }
+}
+
+new_table$prop = new_table$count/sum(new_table$count)
+p2 = ggplot() + geom_line(data=new_table, aes(pos, prop)) +
+  labs(x ="position in bp", y="proportion", main=NULL) + mytheme
+
+gA <- ggplotGrob(p1)
+gB <- ggplotGrob(p2)
+grid::grid.newpage()
+grid::grid.draw(rbind(gA, gB))
+
+```
+
+
+...
+
+
+...
+
+#### plotting cross overs positions chromosome 2
+
+```{r chr2, echo=FALSE, fig.width=12, fig.height=10}
+table = na.omit(read.delim(file="chromosome_2_crossover_positions.txt"))
+
+p1 = ggplot() + geom_line(data=table, aes(x=mid.point, y=XOs, colour = Cross)) +
+  labs(x ="position in bp", y="num crossovers", main=NULL) + mytheme
+
+new_table <- data.frame(t(rep(NA,2)))
+names(new_table) <- c("pos", "count")
+
+num = 1
+for (i in 1:nrow(table)) {
+  if (is.element(table$mid.point[i], new_table$pos)){
+    index = match(table$mid.point[i], new_table$pos)
+    new_table$count[index] = new_table$count[index] + table$XOs[i]
+  } else {
+    new_table[num,] <- c(table$mid.point[i], table$XOs[i])
+    num = num + 1
+  }
+}
+
+new_table$prop = new_table$count/sum(new_table$count)
+p2 = ggplot() + geom_line(data=new_table, aes(pos, prop)) +
+  labs(x ="position in bp", y="proportion", main=NULL) + mytheme
+
+gA <- ggplotGrob(p1)
+gB <- ggplotGrob(p2)
+grid::grid.newpage()
+grid::grid.draw(rbind(gA, gB))
+
+
+```
+
+
+...
+
+
+...
+
+#### plotting cross overs positions chromosome 3
+
+```{r chr3, echo=FALSE, fig.width=12, fig.height=10}
+table = na.omit(read.delim(file="chromosome_3_crossover_positions.txt"))
+
+p1 = ggplot() + geom_line(data=table, aes(x=mid.point, y=XOs, colour = Cross)) +
+  labs(x ="position in bp", y="num crossovers", main=NULL) + mytheme
+
+new_table <- data.frame(t(rep(NA,2)))
+names(new_table) <- c("pos", "count")
+
+num = 1
+for (i in 1:nrow(table)) {
+  if (is.element(table$mid.point[i], new_table$pos)){
+    index = match(table$mid.point[i], new_table$pos)
+    new_table$count[index] = new_table$count[index] + table$XOs[i]
+  } else {
+    new_table[num,] <- c(table$mid.point[i], table$XOs[i])
+    num = num + 1
+  }
+}
+
+new_table$prop = new_table$count/sum(new_table$count)
+p2 = ggplot() + geom_line(data=new_table, aes(pos, prop)) +
+  labs(x ="position in bp", y="proportion", main=NULL) + mytheme
+
+gA <- ggplotGrob(p1)
+gB <- ggplotGrob(p2)
+grid::grid.newpage()
+grid::grid.draw(rbind(gA, gB))
+
+
+```
+
+
+...
+
+
+...
+
+#### plotting cross overs positions chromosome 4
+
+```{r chr4, echo=FALSE, fig.width=12, fig.height=10}
+table = na.omit(read.delim(file="chromosome_4_crossover_positions.txt"))
+
+p1 = ggplot() + geom_line(data=table, aes(x=mid.point, y=XOs, colour = Cross)) +
+  labs(x ="position in bp", y="num crossovers", main=NULL) + mytheme
+
+new_table <- data.frame(t(rep(NA,2)))
+names(new_table) <- c("pos", "count")
+
+num = 1
+for (i in 1:nrow(table)) {
+  if (is.element(table$mid.point[i], new_table$pos)){
+    index = match(table$mid.point[i], new_table$pos)
+    new_table$count[index] = new_table$count[index] + table$XOs[i]
+  } else {
+    new_table[num,] <- c(table$mid.point[i], table$XOs[i])
+    num = num + 1
+  }
+}
+
+new_table$prop = new_table$count/sum(new_table$count)
+p2 = ggplot() + geom_line(data=new_table, aes(pos, prop)) +
+  labs(x ="position in bp", y="proportion", main=NULL) + mytheme
+
+gA <- ggplotGrob(p1)
+gB <- ggplotGrob(p2)
+grid::grid.newpage()
+grid::grid.draw(rbind(gA, gB))
+
+
+```
+
+
+...
+
+
+...
+
+#### plotting cross overs positions chromosome 5
+
+```{r chr5, echo=FALSE, fig.width=12, fig.height=10}
+table = na.omit(read.delim(file="chromosome_5_crossover_positions.txt"))
+
+p1 = ggplot() + geom_line(data=table, aes(x=mid.point, y=XOs, colour = Cross)) +
+  labs(x ="position in bp", y="num crossovers", main=NULL) + mytheme
+
+new_table <- data.frame(t(rep(NA,2)))
+names(new_table) <- c("pos", "count")
+
+num = 1
+for (i in 1:nrow(table)) {
+  if (is.element(table$mid.point[i], new_table$pos)){
+    index = match(table$mid.point[i], new_table$pos)
+    new_table$count[index] = new_table$count[index] + table$XOs[i]
+  } else {
+    new_table[num,] <- c(table$mid.point[i], table$XOs[i])
+    num = num + 1
+  }
+}
+
+new_table$prop = new_table$count/sum(new_table$count)
+p2 = ggplot() + geom_line(data=new_table, aes(pos, prop)) +
+  labs(x ="position in bp", y="proportion", main=NULL) + mytheme
+
+gA <- ggplotGrob(p1)
+gB <- ggplotGrob(p2)
+grid::grid.newpage()
+grid::grid.draw(rbind(gA, gB))
+
+
+```
+
+
+...
+
+
+...
+
