@@ -1,14 +1,22 @@
 #encoding: utf-8
 require 'bio'
 require 'bio-samtools'
+require 'pickup'
 require 'rinruby'
+require 'yaml'
 
 if ARGV.empty?
-   puts "Please specify (1) marker vcf file, (2) genome config yaml file as arguments in that order"
+   puts "Please provide directory path of configs.yaml file as argument"
 else
-   in_vcf = ARGV[0] # location of variants vcf file that will be used as markers
-   config = ARGV[1] # config file about recombination frequency and number fo chromosomes
+   indir = File.expand_path ARGV[0] # location of config file about recombination frequency and number fo chromosomes
 end
+
+pars = YAML.load_file("#{indir}/configs.yml")
+in_vcf = pars['in_vcf']
+xovers = pars['xovers']
+progeny = pars['progeny']
+chrs = pars['chrs']
+recomb_rate = 0.3
 
 markers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash of variants from vcf file
 File.open(in_vcf, 'r').each do |line|
@@ -23,28 +31,6 @@ File.open(in_vcf, 'r').each do |line|
       markers[chrom][pos] = "HOM"
    end
 end
-
-recomb_rate = 0.3
-progeny_num = 48
-
-chrs = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
-chrs = {
-  1 => { :len => 30427671,
-          :shape => 2.50865081752102,
-          :rate => 1.47078817359057},
-  2 => { :len => 19698289,
-          :shape => 1.54709784939559,
-          :rate => 1.39342241831905},
-  3 => { :len => 23459830,
-          :shape => 1.84384180876518,
-          :rate => 1.37450025744314},
-  4 => { :len => 18585056,
-          :shape => 1.64579513413549,
-          :rate => 1.41126184469062},
-  5 => { :len => 26975502,
-          :shape => 2.20830508080888,
-          :rate => 1.42284254157339}
-}
 
 def recombinant_progeny (chrs, progeny_num)
   myr = RinRuby.new(:echo => false)
@@ -69,5 +55,10 @@ def recombinant_progeny (chrs, progeny_num)
   end
   myr.quit
   chrs
+end
+
+def recombination_positions (prob_hash, number)
+  pos_pool = Pickup.new(prob_hash, uniq: true)
+  pos_pool.pick(number)
 end
 
