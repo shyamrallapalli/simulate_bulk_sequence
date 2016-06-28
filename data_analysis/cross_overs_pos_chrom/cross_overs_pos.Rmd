@@ -23,7 +23,7 @@ library(fitdistrplus)
 ## cusotom ggplot theme
 source("~/git-hub-repos/shyamrallapalli/mutations_hts_noref/lib/ggplot_theme.R")
 source("~/git-hub-repos/shyamrallapalli/mutations_hts_noref/lib/qqline2.R")
-mytheme = mytheme + theme(legend.direction="horizontal", legend.position=c(0.48,0.9))
+mytheme = mytheme + theme(legend.direction="horizontal", legend.position=c(0.5,0.9))
 
 ```
 
@@ -47,10 +47,11 @@ Supplemental information from above manuscript is downloaded and is in the follo
 
 ```{r chr1, echo=FALSE, fig.width=12, fig.height=10}
 table = na.omit(read.delim(file="chromosome_1_crossover_positions.txt"))
+table = subset(table, Cross != "P17")
 
 p1 = ggplot() + geom_line(data=table, aes(x=mid.point, y=XOs, colour = Cross)) +
   labs(x ="position in bp", y="num crossovers", main=NULL) + mytheme +
-  guides(col = guide_legend(ncol = 9, byrow = TRUE))
+  guides(col = guide_legend(ncol = 8, byrow = TRUE))
 
 pool_positions = function(df,id){
   table_out <- data.frame(t(rep(NA,3)))
@@ -94,10 +95,11 @@ outtable = new_table
 
 ```{r chr2, echo=FALSE, fig.width=12, fig.height=10}
 table = na.omit(read.delim(file="chromosome_2_crossover_positions.txt"))
+table = subset(table, Cross != "P17")
 
 p1 = ggplot() + geom_line(data=table, aes(x=mid.point, y=XOs, colour = Cross)) +
   labs(x ="position in bp", y="num crossovers", main=NULL) + mytheme +
-  guides(col = guide_legend(ncol = 9, byrow = TRUE))
+  guides(col = guide_legend(ncol = 8, byrow = TRUE))
 
 new_table = pool_positions(table, "chr2")
 new_table$prop = new_table$count/sum(new_table$count)
@@ -122,10 +124,11 @@ outtable = rbind(outtable, new_table)
 
 ```{r chr3, echo=FALSE, fig.width=12, fig.height=10}
 table = na.omit(read.delim(file="chromosome_3_crossover_positions.txt"))
+table = subset(table, Cross != "P17")
 
 p1 = ggplot() + geom_line(data=table, aes(x=mid.point, y=XOs, colour = Cross)) +
   labs(x ="position in bp", y="num crossovers", main=NULL) + mytheme +
-  guides(col = guide_legend(ncol = 9, byrow = TRUE))
+  guides(col = guide_legend(ncol = 8, byrow = TRUE))
 
 new_table = pool_positions(table, "chr3")
 new_table$prop = new_table$count/sum(new_table$count)
@@ -150,10 +153,11 @@ outtable = rbind(outtable, new_table)
 
 ```{r chr4, echo=FALSE, fig.width=12, fig.height=10}
 table = na.omit(read.delim(file="chromosome_4_crossover_positions.txt"))
+table = subset(table, Cross != "P17")
 
 p1 = ggplot() + geom_line(data=table, aes(x=mid.point, y=XOs, colour = Cross)) +
   labs(x ="position in bp", y="num crossovers", main=NULL) + mytheme +
-  guides(col = guide_legend(ncol = 9, byrow = TRUE))
+  guides(col = guide_legend(ncol = 8, byrow = TRUE))
 
 new_table = pool_positions(table, "chr4")
 new_table$prop = new_table$count/sum(new_table$count)
@@ -179,10 +183,11 @@ outtable = rbind(outtable, new_table)
 
 ```{r chr5, echo=FALSE, fig.width=12, fig.height=10}
 table = na.omit(read.delim(file="chromosome_5_crossover_positions.txt"))
+table = subset(table, Cross != "P17")
 
 p1 = ggplot() + geom_line(data=table, aes(x=mid.point, y=XOs, colour = Cross)) +
   labs(x ="position in bp", y="num crossovers", main=NULL) + mytheme +
-  guides(col = guide_legend(ncol = 9, byrow = TRUE))
+  guides(col = guide_legend(ncol = 8, byrow = TRUE))
 
 new_table = pool_positions(table, "chr5")
 new_table$prop = new_table$count/sum(new_table$count)
