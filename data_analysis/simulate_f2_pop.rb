@@ -77,9 +77,22 @@ def counts_to_prop(hash)
   hash
 end
 
-def recombination_positions (prop_hash, number)
-  pos_pool = Pickup.new(prop_hash, uniq: true)
+def recombination_positions (prop_hash, number, chrlength)
+  new_hash = deep_copy_hash(prop_hash)
+  positions = []
+  pos_pool = Pickup.new(new_hash, uniq: true)
   pos_pool.pick(number)
+end
+
+# deep copy hash
+def deep_copy_hash(in_hash)
+  tempname = Time.now.to_f.to_s + '.yml'
+  File.open("#{tempname}", 'w') do |file|
+    file.write in_hash.to_yaml
+  end
+  out_hash = YAML.load_file(tempname)
+  %x[rm #{tempname}]
+  out_hash
 end
 
 # xovers = counts_to_prop(xovers)
