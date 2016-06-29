@@ -105,5 +105,19 @@ def deep_copy_hash(in_hash)
   out_hash
 end
 
+# adjust probability 5Mb either side of the recombination point
+# to reduce the chace of another recombinatino point picked
+def adjust_prob(hash, position)
+  hash.each_key do | pos |
+    diff = (pos - position).abs
+    # 5 Mb is the cut off on either side
+    cutoff = 5000000
+    if diff < cutoff
+      adj = hash[pos] * (diff/cutoff)
+      hash[pos] = adj.to_i
+    end
+  end
+end
+
 # xovers = counts_to_prop(xovers)
 # testnum = recombination_positions(xovers[xovers.keys[0]], 3)
