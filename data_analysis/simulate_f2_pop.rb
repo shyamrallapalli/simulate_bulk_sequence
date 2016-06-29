@@ -81,7 +81,17 @@ def recombination_positions (prop_hash, number, chrlength)
   new_hash = deep_copy_hash(prop_hash)
   positions = []
   pos_pool = Pickup.new(new_hash, uniq: true)
-  pos_pool.pick(number)
+  # need to included recombination suppression around a recombination event
+  if number > 1
+    for i in 1..number
+      selected = pos_pool.pick(1)
+      positions << selected
+      new_hash = adjust_prob(new_hash, selected)
+    end
+  else
+    positions << pos_pool.pick(number)
+  end
+  positions.flatten
 end
 
 # deep copy hash
