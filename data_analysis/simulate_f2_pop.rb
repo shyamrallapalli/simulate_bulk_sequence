@@ -39,6 +39,11 @@ File.open(xover_file, 'r').each do |line|
   xovers[info[0]][info[1].to_f.ceil] = info[2].to_i
 end
 
+
+
+################################################
+# methods
+
 def recombinant_progeny (chrs, progeny_num)
   myr = RinRuby.new(:echo => false)
   myr.assign 'num', progeny_num
@@ -58,7 +63,7 @@ def recombinant_progeny (chrs, progeny_num)
     chrs[chr][:progeny] = array
     # distribution of recombination per chromosome for the gamets (taking 4 times the selected progeny)
     array = myr.pull 'round(rgamma(4*num, shape=shap, rate=rat))'
-    chrs[chr][:gamets] = array
+    chrs[chr][:gametes] = array
   end
   myr.quit
   chrs
@@ -77,16 +82,20 @@ def prop_to_counts(hash)
   hash
 end
 
-def recombination_positions (count_hash, number, chrlength)
+def recombination_positions (count_hash, number)
   new_hash = deep_copy_hash(count_hash)
   positions = []
   pos_pool = Pickup.new(new_hash, uniq: true)
-  # need to included recombination suppression around a recombination event
   if number > 1
     for i in 1..number
       selected = pos_pool.pick(1)
       positions << selected
+      # no need to adjust after the last recombination
+      next if i == number
+      # adjut proportions around recombinaiton positions
+      # and recreate Pickup object
       new_hash = adjust_prob(new_hash, selected)
+      pos_pool = Pickup.new(new_hash, uniq: true)
     end
   else
     positions << pos_pool.pick(number)
@@ -119,5 +128,3 @@ def adjust_prob(hash, position)
   end
 end
 
-# xovers = counts_to_prop(xovers)
-# testnum = recombination_positions(xovers[xovers.keys[0]], 3)
