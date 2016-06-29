@@ -64,21 +64,21 @@ def recombinant_progeny (chrs, progeny_num)
   chrs
 end
 
-def counts_to_prop(hash)
+def prop_to_counts(hash)
   chrom = hash.keys[0]
-  if hash[chrom].values[0].class == Fixnum
+  if hash[chrom].values[0].class == Float
     hash.each_key do | chr |
-      sum = hash[chr].values.inject(0, :+)
       hash[chr].each_key do | pos |
-        hash[chr][pos] = hash[chr][pos].to_f/sum
+        # adjusting proportions to number per 10k
+        hash[chr][pos] = hash[chr][pos] * 10000
       end
     end
   end
   hash
 end
 
-def recombination_positions (prop_hash, number, chrlength)
-  new_hash = deep_copy_hash(prop_hash)
+def recombination_positions (count_hash, number, chrlength)
+  new_hash = deep_copy_hash(count_hash)
   positions = []
   pos_pool = Pickup.new(new_hash, uniq: true)
   # need to included recombination suppression around a recombination event
