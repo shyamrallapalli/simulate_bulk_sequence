@@ -22,13 +22,15 @@ markers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash of variant
 File.open(in_vcf, 'r').each do |line|
    next if line =~ /^#/
    v = Bio::DB::Vcf.new(line)
-   chrom = v.chrom
-   pos = v.pos
    info = v.info
    if info["HET"] == "1"
-      markers[chrom][pos] = "HET"
+      markers[v.chrom][v.pos][:ref] = v.ref
+      markers[v.chrom][v.pos][:alt] = v.alt
+      markers[v.chrom][v.pos][:type] = 'het'
    elsif info["HOM"] == "1"
-      markers[chrom][pos] = "HOM"
+      markers[v.chrom][v.pos][:ref] = v.ref
+      markers[v.chrom][v.pos][:alt] = v.alt
+      markers[v.chrom][v.pos][:type] = 'hom'
    end
 end
 
@@ -39,12 +41,27 @@ File.open(xover_file, 'r').each do |line|
   xovers[info[0]][info[1].to_f.ceil] = info[2].to_i
 end
 
+# get recombination events in progeny and gametes
+chrs = recombinant_progeny(chrs, progeny)
+xovers = prop_to_counts(xovers)
+
+gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recombined gamets
+
+chrs.each_key do | chr |
+  chrs[chr][:gametes].each do | num_xos |
+    warn "#{chr}\t#{xovers[chr]}\n#{num_xos}"
+    recom_pos = recombination_positions(xovers[chr], num_xos.to_i)
+    warn "#{recom_pos}"
+    gametes = recombined_chromosome(recom_pos, markers[chr])
+    warn "#{gametes.class}"
+  end
+end
 
 
 ################################################
 # methods
 
-def recombinant_progeny (chrs, progeny_num)
+def recombinant_progeny(chrs, progeny_num)
   myr = RinRuby.new(:echo => false)
   myr.assign 'num', progeny_num
   chrs.each_key do | chr |
@@ -82,7 +99,7 @@ def prop_to_counts(hash)
   hash
 end
 
-def recombination_positions (count_hash, number)
+def recombination_positions(count_hash, number)
   new_hash = deep_copy_hash(count_hash)
   positions = []
   pos_pool = Pickup.new(new_hash, uniq: true)
@@ -91,7 +108,7 @@ def recombination_positions (count_hash, number)
       selected = pos_pool.pick(1)
       positions << selected
       # no need to adjust after the last recombination
-      next if i == number
+      break if i == number
       # adjut proportions around recombinaiton positions
       # and recreate Pickup object
       new_hash = adjust_prob(new_hash, selected)
@@ -128,3 +145,32 @@ def adjust_prob(hash, position)
   end
 end
 
+
+def recombined_chromosome(recomb_positions, markers)
+  # hash of recombined chromosome markers
+  recomb_chr = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
+  # for no recombination one gamete wildtype and other with markers
+  if recomb_positions.length == 0
+    recomb_chr[:one] = markers
+    recomb_chr[:two] = 'wildtype'
+  else # if 1 or more recombination present split markers
+    index = 0
+    positions = markers.keys
+    recomb_positions.each do | recomb_pos |
+      # check recombination number index and
+      # switch gametes to store positions correctly
+      one = index.even? ? :one : :two
+      positions.each do | marker_pos |
+        if marker_pos <= recomb_pos
+          recomb_chr[one][marker_pos] = markers[marker_pos]
+          positions.drop(1)
+        end
+      end
+      index += 1
+    end
+    two = index.even? ? :one : :two
+    positions.each do | marker_pos |
+      recomb_chr[two][marker_pos] = markers[marker_pos]
+    end
+  end
+end
