@@ -3,28 +3,28 @@
 in_vcf: 'snps.vcf'
 # recombination positions and probabilities
 xovers: 'crossovers.txt'
-progeny: 48
+progeny: 1
 # chromosome number and details
 # for each chromosomes must include length
 # shape and rate are optional, if not provided will be calculated
 chrs:
-  1:
+  Chr1:
     :len: 30427671
     :shape: 2.50865081752102
     :rate: 1.47078817359057
-  2:
+  Chr2:
     :len: 19698289
     :shape: 1.54709784939559
     :rate: 1.39342241831905
-  3:
+  Chr3:
     :len: 23459830
     :shape: 1.84384180876518
     :rate: 1.37450025744314
-  4:
+  Chr4:
     :len: 18585056
     :shape: 1.64579513413549
     :rate: 1.41126184469062
-  5:
+  Chr5:
     :len: 26975502
     :shape: 2.20830508080888
     :rate: 1.42284254157339
