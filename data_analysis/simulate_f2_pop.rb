@@ -105,7 +105,7 @@ def recombination_positions(count_hash, number)
   pos_pool = Pickup.new(new_hash, uniq: true)
   if number > 1
     for i in 1..number
-      selected = pos_pool.pick(1)
+      selected = select_non_nil_position(pos_pool)
       positions << selected
       # no need to adjust after the last recombination
       break if i == number
@@ -115,9 +115,18 @@ def recombination_positions(count_hash, number)
       pos_pool = Pickup.new(new_hash, uniq: true)
     end
   else
-    positions << pos_pool.pick(number)
+    selected = select_non_nil_position(pos_pool)
+    positions << selected
   end
   positions.flatten
+end
+
+def select_non_nil_position(pickup_obj)
+  selected = pickup_obj.pick(1)
+  until selected != nil
+    selected = pickup_obj.pick(1)
+  end
+  selected
 end
 
 # deep copy hash
