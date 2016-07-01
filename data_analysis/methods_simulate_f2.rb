@@ -21,11 +21,13 @@ def recombinant_progeny(chrs, progeny_num)
     myr.assign 'shap', shape
     myr.assign 'rat', rate
     # distribution of recombination per chromosome for selected progeny
-    array = myr.pull 'round(rgamma(num, shape=shap, rate=rat))'
-    chrs[chr][:progeny] = array
+    array = []
+    array << myr.pull('round(rgamma(num, shape=shap, rate=rat))')
+    chrs[chr][:progeny] = array.flatten
     # distribution of recombination per chromosome for the gamets (taking 4 times the selected progeny)
-    array = myr.pull 'round(rgamma(4*num, shape=shap, rate=rat))'
-    chrs[chr][:gametes] = array
+    array = []
+    array << myr.pull('round(rgamma(4*num, shape=shap, rate=rat))')
+    chrs[chr][:gametes] = array.flatten
   end
   myr.quit
   chrs
