@@ -65,7 +65,7 @@ def recombination_positions(count_hash, number)
     selected = select_non_nil_position(pos_pool)
     positions << selected
   end
-  positions.flatten
+  positions.flatten.sort
 end
 
 
@@ -119,17 +119,22 @@ def recombined_chromosome(recomb_positions, markers)
       # check recombination number index and
       # switch gametes to store positions correctly
       one = index.even? ? :one : :two
-      positions.each do | marker_pos |
+      positions.sort.each do | marker_pos |
         if marker_pos <= recomb_pos
           recomb_chr[one][marker_pos] = markers[marker_pos]
-          positions.drop(1)
+          positions.delete(marker_pos)
+        else
+          # since positions are sorted, breaking loop as soon as
+          # positions are higher than recombination point
+          break
         end
       end
       index += 1
     end
     two = index.even? ? :one : :two
-    positions.each do | marker_pos |
+    positions.sort.each do | marker_pos |
       recomb_chr[two][marker_pos] = markers[marker_pos]
+      positions.delete(marker_pos)
     end
   end
   recomb_chr
