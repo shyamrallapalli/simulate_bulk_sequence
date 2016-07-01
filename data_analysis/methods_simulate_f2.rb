@@ -95,8 +95,8 @@ end
 def adjust_prob(hash, position)
   hash.each_key do | pos |
     diff = (pos - position).abs
-    # 5 Mb is the cut off on either side
-    cutoff = 5000000
+    # 3 Mb is the cut off on either side
+    cutoff = 3000000
     if diff < cutoff
       adj = hash[pos] * (diff/cutoff)
       hash[pos] = adj.to_i
