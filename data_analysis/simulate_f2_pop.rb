@@ -2,7 +2,6 @@
 require 'bio'
 require 'bio-samtools'
 require 'pickup'
-require 'rinruby'
 require 'yaml'
 require_relative 'methods_simulate_f2'
 
@@ -46,15 +45,24 @@ end
 chrs = recombinant_progeny(chrs, progeny)
 xovers = prop_to_counts(xovers)
 
+# At least in arabidopsis there are more recombinations in male chromosomes than female during meiosis
+# http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1002354
+sex_recomb_hash = {:male => 6, :female => 4}
+
 gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recombined gamets
 
 chrs.each_key do | chr |
   chrs[chr][:gametes].each do | num_xos |
-    warn "#{chr}\t#{xovers[chr]}\n#{num_xos}"
-    recom_pos = recombination_positions(xovers[chr], num_xos.to_i)
-    warn "#{recom_pos}"
-    gametes = recombined_chromosome(recom_pos, markers[chr])
-    warn "#{gametes.class}"
+    sex_recomb_array = []
+    sex_recomb_array << Pickup.new(sex_recomb_hash).pick(num_xos.to_i)
+    sex_recomb_array.flatten!
+    warn "#{chr}\t#{num_xos}\t#{sex_recomb_array}"
+    sex_recomb_array.uniq.each do | type |
+      count = sex_recomb_array.count(type)
+      recom_pos = recombination_positions(xovers[chr], count)
+      gametes[type] = recombined_chromosome(recom_pos, markers[chr])
+    end
+    warn "#{gametes}"
   end
 end
 

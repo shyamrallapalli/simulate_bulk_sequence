@@ -1,4 +1,7 @@
 #encoding: utf-8
+require 'pickup'
+require 'rinruby'
+require 'yaml'
 
 ################################################
 # methods
@@ -28,6 +31,7 @@ def recombinant_progeny(chrs, progeny_num)
   chrs
 end
 
+
 def prop_to_counts(hash)
   chrom = hash.keys[0]
   if hash[chrom].values[0].class == Float
@@ -40,6 +44,7 @@ def prop_to_counts(hash)
   end
   hash
 end
+
 
 def recombination_positions(count_hash, number)
   new_hash = deep_copy_hash(count_hash)
@@ -63,6 +68,7 @@ def recombination_positions(count_hash, number)
   positions.flatten
 end
 
+
 def select_non_nil_position(pickup_obj)
   selected = pickup_obj.pick(1)
   until selected != nil
@@ -70,6 +76,7 @@ def select_non_nil_position(pickup_obj)
   end
   selected
 end
+
 
 # deep copy hash
 def deep_copy_hash(in_hash)
@@ -81,6 +88,7 @@ def deep_copy_hash(in_hash)
   %x[rm #{tempname}]
   out_hash
 end
+
 
 # adjust probability 5Mb either side of the recombination point
 # to reduce the chace of another recombinatino point picked
@@ -124,4 +132,6 @@ def recombined_chromosome(recomb_positions, markers)
       recomb_chr[two][marker_pos] = markers[marker_pos]
     end
   end
+  recomb_chr
 end
+
