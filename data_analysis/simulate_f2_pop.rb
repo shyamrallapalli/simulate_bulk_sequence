@@ -22,16 +22,14 @@ markers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash of variant
 File.open(in_vcf, 'r').each do |line|
    next if line =~ /^#/
    v = Bio::DB::Vcf.new(line)
-   info = v.info
-   if info["HET"] == "1"
-      markers[v.chrom][v.pos][:ref] = v.ref
-      markers[v.chrom][v.pos][:alt] = v.alt
-      markers[v.chrom][v.pos][:type] = 'het'
-   elsif info["HOM"] == "1"
-      markers[v.chrom][v.pos][:ref] = v.ref
-      markers[v.chrom][v.pos][:alt] = v.alt
-      markers[v.chrom][v.pos][:type] = 'hom'
-   end
+   markers[v.chrom][v.pos][:ref] = v.ref
+   markers[v.chrom][v.pos][:alt] = v.alt
+   # info = v.info
+   # if info["HET"] == "1"
+   #    markers[v.chrom][v.pos][:type] = 'het'
+   # elsif info["HOM"] == "1"
+   #    markers[v.chrom][v.pos][:type] = 'hom'
+   # end
 end
 
 xovers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash of cross over position and prop
