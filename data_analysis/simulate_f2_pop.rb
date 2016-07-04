@@ -49,7 +49,6 @@ gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recomb
 counter = 0 # a counter to index recombined chromosomes at different recombinations per chromosome
 chrs.each_key do | chr |
   chrs[chr][:gametes].each do | num_xos |
-    num_xos = num_xos.to_i
     # for chromosomes with no recombination one gamete wildtype and other with markers
     if num_xos == 0
       array = [:one, :two]
