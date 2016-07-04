@@ -44,32 +44,26 @@ end
 chrs = recombinant_progeny(chrs, progeny)
 xovers = prop_to_counts(xovers)
 
-# At least in arabidopsis there are more recombinations in male chromosomes than female during meiosis
-# http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1002354
-sex_recomb_hash = {:male => 6, :female => 4}
-
 gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recombined gamets
 
 counter = 0 # a counter to index recombined chromosomes at different recombinations per chromosome
 chrs.each_key do | chr |
   chrs[chr][:gametes].each do | num_xos |
     num_xos = num_xos.to_i
-    sex_recomb_array = []
-    sex_recomb_array << Pickup.new(sex_recomb_hash).pick(num_xos)
-    sex_recomb_array.flatten!
-    sex_recomb_array.uniq.each do | type |
-      count = sex_recomb_array.count(type)
-      recom_pos = recombination_positions(xovers[chr], count)
-      gametes[chr][count][type][counter] = recombined_chromosome(recom_pos, markers[chr])
-    end
     # for chromosomes with no recombination one gamete wildtype and other with markers
     if num_xos == 0
-      # pick no recobination chromosome either in male or female (opposite likely hood to recombination)
-      type = Pickup.new({:male => 4, :female => 6}).pick(1)
       array = [:one, :two]
       array.shuffle!
+      type = non_recombinant_gender
       gametes[chr][num_xos][type][array[0]] = markers
       gametes[chr][num_xos][type][array[1]] = 'wildtype'
+    else
+      gender_recomb_array = recombinant_gender_num(num_xos)
+      gender_recomb_array.uniq.each do | type |
+        count = gender_recomb_array.count(type)
+        recom_pos = recombination_positions(xovers[chr], count)
+        gametes[chr][count][type][counter] = recombined_chromosome(recom_pos, markers[chr])
+      end
     end
     counter += 1
   end
