@@ -53,16 +53,27 @@ gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recomb
 counter = 0 # a counter to index recombined chromosomes at different recombinations per chromosome
 chrs.each_key do | chr |
   chrs[chr][:gametes].each do | num_xos |
+    num_xos = num_xos.to_i
     sex_recomb_array = []
-    sex_recomb_array << Pickup.new(sex_recomb_hash).pick(num_xos.to_i)
+    sex_recomb_array << Pickup.new(sex_recomb_hash).pick(num_xos)
     sex_recomb_array.flatten!
     sex_recomb_array.uniq.each do | type |
       count = sex_recomb_array.count(type)
       recom_pos = recombination_positions(xovers[chr], count)
       gametes[chr][count][type][counter] = recombined_chromosome(recom_pos, markers[chr])
     end
+    # for chromosomes with no recombination one gamete wildtype and other with markers
+    if num_xos == 0
+      # pick no recobination chromosome either in male or female (opposite likely hood to recombination)
+      type = Pickup.new({:male => 4, :female => 6}).pick(1)
+      array = [:one, :two]
+      array.shuffle!
+      gametes[chr][num_xos][type][array[0]] = markers
+      gametes[chr][num_xos][type][array[1]] = 'wildtype'
+    end
     counter += 1
   end
 end
 
+warn "#{gametes}"
 

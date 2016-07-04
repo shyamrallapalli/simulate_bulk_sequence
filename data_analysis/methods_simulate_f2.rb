@@ -110,11 +110,8 @@ end
 def recombined_chromosome(recomb_positions, markers)
   # hash of recombined chromosome markers
   recomb_chr = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
-  # for no recombination one gamete wildtype and other with markers
-  if recomb_positions.length == 0
-    recomb_chr[:one] = markers
-    recomb_chr[:two] = 'wildtype'
-  else # if 1 or more recombination present split markers
+  # if 1 or more recombination present split markers
+  if recomb_positions.length > 0
     index = 0
     positions = markers.keys
     recomb_positions.each do | recomb_pos |
