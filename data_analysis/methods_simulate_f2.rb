@@ -7,6 +7,10 @@ require 'yaml'
 # methods
 
 def recombinant_progeny(chrs, progeny_num)
+  # progeny_num has to be at least 2 or more
+  if progeny_num < 2
+    progeny_num = 2
+  end
   myr = RinRuby.new(:echo => false)
   myr.assign 'num', progeny_num
   chrs.each_key do | chr |
@@ -25,8 +29,9 @@ def recombinant_progeny(chrs, progeny_num)
     array << myr.pull('round(rgamma(num, shape=shap, rate=rat))')
     chrs[chr][:progeny] = array.flatten.map {|x| x.to_i }
     # distribution of recombination per chromosome for the gamets (taking 4 times the selected progeny)
+    myr.eval 'gametes = round (num * (100/log(num, 1.5)))'
     array = []
-    array << myr.pull('round(rgamma(4*num, shape=shap, rate=rat))')
+    array << myr.pull('round(rgamma(gametes, shape=shap, rate=rat))')
     chrs[chr][:gametes] = array.flatten.map {|x| x.to_i }
   end
   myr.quit
@@ -153,7 +158,7 @@ def non_recombinant_gender
   Pickup.new({:male => 4, :female => 6}).pick(1)
 end
 
-def randamize_pair
+def randomize_pair
   array = [:one, :two]
   array.shuffle!
   one = array[0]
