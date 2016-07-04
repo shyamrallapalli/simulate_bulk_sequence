@@ -9,6 +9,7 @@ if ARGV.empty?
    puts "Please provide directory path of configs.yaml file as argument"
 else
    indir = File.expand_path ARGV[0] # location of config file about recombination frequency and number fo chromosomes
+   Dir.chdir(indir)
 end
 
 pars = YAML.load_file("#{indir}/configs.yml")
@@ -49,18 +50,18 @@ sex_recomb_hash = {:male => 6, :female => 4}
 
 gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recombined gamets
 
+counter = 0 # a counter to index recombined chromosomes at different recombinations per chromosome
 chrs.each_key do | chr |
   chrs[chr][:gametes].each do | num_xos |
     sex_recomb_array = []
     sex_recomb_array << Pickup.new(sex_recomb_hash).pick(num_xos.to_i)
     sex_recomb_array.flatten!
-    warn "#{chr}\t#{num_xos}\t#{sex_recomb_array}"
     sex_recomb_array.uniq.each do | type |
       count = sex_recomb_array.count(type)
       recom_pos = recombination_positions(xovers[chr], count)
-      gametes[type] = recombined_chromosome(recom_pos, markers[chr])
+      gametes[chr][count][type][counter] = recombined_chromosome(recom_pos, markers[chr])
     end
-    warn "#{gametes}"
+    counter += 1
   end
 end
 
