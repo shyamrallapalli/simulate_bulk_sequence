@@ -51,11 +51,10 @@ chrs.each_key do | chr |
   chrs[chr][:gametes].each do | num_xos |
     # for chromosomes with no recombination one gamete wildtype and other with markers
     if num_xos == 0
-      array = [:one, :two]
-      array.shuffle!
+      one, two = randomize_pair
       type = non_recombinant_gender
-      gametes[chr][num_xos][type][array[0]] = markers
-      gametes[chr][num_xos][type][array[1]] = 'wildtype'
+      gametes[chr][num_xos][type][counter][one] = markers
+      gametes[chr][num_xos][type][counter][two] = 'wildtype'
     else
       gender_recomb_array = recombinant_gender_num(num_xos)
       gender_recomb_array.uniq.each do | type |

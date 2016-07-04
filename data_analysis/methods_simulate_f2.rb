@@ -153,4 +153,11 @@ def non_recombinant_gender
   Pickup.new({:male => 4, :female => 6}).pick(1)
 end
 
+def randamize_pair
+  array = [:one, :two]
+  array.shuffle!
+  one = array[0]
+  two = array[1]
+  [one, two]
+end
 
