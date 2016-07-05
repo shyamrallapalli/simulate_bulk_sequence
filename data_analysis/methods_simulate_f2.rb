@@ -145,12 +145,18 @@ def recombined_chromosome(recomb_positions, markers)
 end
 
 def recombinant_gender_num(number)
+  gender_recomb_hash = {:male => 0, :female => 0}
+  return gender_recomb_hash if number == 0
   # At least in arabidopsis there are more recombinations in male chromosomes than female during meiosis
   # http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1002354
-  gender_recomb_hash = {:male => 6, :female => 4}
+  gender_recomb_weights = {:male => 6, :female => 4}
   gender_recomb_array = []
-  gender_recomb_array << Pickup.new(gender_recomb_hash).pick(number)
-  gender_recomb_array.flatten
+  gender_recomb_array << Pickup.new(gender_recomb_weights).pick(number)
+  gender_recomb_array.flatten!
+  gender_recomb_array.uniq.each do | type |
+    gender_recomb_hash[type] = gender_recomb_array.count(type)
+  end
+  gender_recomb_hash
 end
 
 def non_recombinant_gender
