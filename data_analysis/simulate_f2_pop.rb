@@ -46,8 +46,9 @@ xovers = prop_to_counts(xovers)
 
 gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recombined gamets
 
-counter = 0 # a counter to index recombined chromosomes at different recombinations per chromosome
 chrs.each_key do | chr |
+  # a counter to index recombined chromosomes at different recombinations per chromosome
+  counter = 0
   chrs[chr][:gametes].each do | num_xos |
     gender_recomb_hash = recombinant_gender_num(num_xos)
     gender_recomb_hash.each_key do | type |
@@ -61,39 +62,21 @@ end
 
 # warn "#{gametes}"
 
-def get_male_female_index(gametes, chr, num_xos)
-  male = gametes[chr][num_xos][:male].keys.sample
-  female = gametes[chr][num_xos][:female].keys.sample
-  until male != female
-    female = gametes[chr][num_xos][:female].keys.sample
-  end
-  [male,female]
-end
-
 progeny = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recombined gamets
-counter = 0
 chrs.each_key do | chr |
+  counter = 0 # counter for progeny
   chrs[chr][:progeny].each do | num_xos |
-    if num_xos == 0
-      one, two = randomize_pair
-      male, female = get_male_female_index(gametes, chr, num_xos)
-      progeny[chr][counter][:male] = gametes[chr][num_xos][:male][male][one]
-      gametes[chr][num_xos][:male][male].delete(one)
-      progeny[chr][counter][:female] = gametes[chr][num_xos][:female][female][two]
-      gametes[chr][num_xos][:female][female].delete(two)
-    else
-      gender_recomb_array = recombinant_gender_num(num_xos)
-      one, two = randomize_pair
-      gender_recomb_array.uniq.each do | type |
-        count = gender_recomb_array.count(type)
-        index = gametes[chr][count][type].keys.sample
-        progeny[chr][counter][type] = gametes[chr][count][type][index][one]
-        gametes[chr][count][type][index].delete(one)
-        one = two
-      end
+    gender_recomb_hash = recombinant_gender_num(num_xos)
+    one, two = randomize_pair
+    gender_recomb_hash.each_key do | type |
+      count = gender_recomb_hash[type]
+      index = gametes[chr][count][type].keys.sample
+      progeny[chr][counter][type] = gametes[chr][count][type][index][one]
+      gametes[chr][count][type][index].delete(one)
+      one = two
     end
+    counter += 1
   end
-  counter += 1
 end
 
 warn "#{progeny}"
