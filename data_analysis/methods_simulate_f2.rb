@@ -7,10 +7,6 @@ require 'yaml'
 # methods
 
 def recombinant_progeny(chrs, progeny_num)
-  # progeny_num has to be at least 2 or more
-  if progeny_num < 2
-    progeny_num = 2
-  end
   myr = RinRuby.new(:echo => false)
   myr.assign 'num', progeny_num
   chrs.each_key do | chr |
@@ -24,11 +20,19 @@ def recombinant_progeny(chrs, progeny_num)
     end
     myr.assign 'shap', shape
     myr.assign 'rat', rate
+
     # distribution of recombination per chromosome for selected progeny
     array = []
     array << myr.pull('round(rgamma(num, shape=shap, rate=rat))')
     chrs[chr][:progeny] = array.flatten.map {|x| x.to_i }
-    # distribution of recombination per chromosome for the gamets (taking 4 times the selected progeny)
+
+    # distribution of recombination per chromosome for the gamets
+    # taking a multiplication factor log base 1.5 times the selected progeny
+    # progeny_num has to be graterthan 1 for this work
+    if progeny_num < 2
+      progeny_num = 2
+    end
+    myr.assign 'num', progeny_num
     myr.eval 'gametes = round (num * (100/log(num, 1.5)))'
     array = []
     array << myr.pull('round(rgamma(gametes, shape=shap, rate=rat))')
