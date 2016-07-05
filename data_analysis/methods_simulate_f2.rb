@@ -54,6 +54,8 @@ end
 
 
 def recombination_positions(count_hash, number)
+  # for zero recombination positions return empty array
+  return [] if number == 0
   new_hash = deep_copy_hash(count_hash)
   positions = []
   pos_pool = Pickup.new(new_hash, uniq: true)
@@ -115,8 +117,13 @@ end
 def recombined_chromosome(recomb_positions, markers)
   # hash of recombined chromosome markers
   recomb_chr = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
+  # for chromosomes with no recombination one gamete wildtype and other with markers
+  if recomb_positions.empty?
+    one, two = randomize_pair
+    recomb_chr[one] = markers
+    recomb_chr[two] = 'wildtype'
   # if 1 or more recombination present split markers
-  if recomb_positions.length > 0
+  else
     index = 0
     positions = markers.keys
     recomb_positions.each do | recomb_pos |
