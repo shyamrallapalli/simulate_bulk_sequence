@@ -15,8 +15,8 @@ end
 
 # a hash of sequences from fasta file
 sequences = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
-Bio::FastaFormat.open(in_assembly).each do |fas|
-  fas.definition += sample
+Bio::FastaFormat.open(in_fasta).each do |fas|
+  fas.definition += ' ' + sample
   sequences[fas.entry_id][:def] = fas.definition
   sequences[fas.entry_id][:seq] = fas.seq
 end
@@ -57,7 +57,7 @@ indels.each_key do | chr |
   end
 end
 
-out_fasta = File.open(sample + '_' + in_fasta, 'w')
+out_fasta = File.open(in_fasta + '_' + sample + '.fas', 'w')
 sequences.each_key do | chr |
   seq = sequences[chr][:seq]
   id = sequences[chr][:def]
