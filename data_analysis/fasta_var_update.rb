@@ -20,11 +20,12 @@ def write_variant_to_chr(variants, fas_entry, outfile)
   # decreasing order of positions
   sorted_pos = indels.keys.sort { |a, b| b <=> a }
   sorted_pos.each do | pos |
-    len = indels[pos].length
-    if length == 1
+    len = indels[pos][:ref].length
+    alt = indels[pos][:alt]
+    if len == 1
       fas_entry.seq[pos-1] = alt
     else
-      stop = spos - 1 - len - 1
+      stop = (pos - 1) + (len - 1)
       fas_entry.seq[pos-1..stop] = alt
     end
   end
