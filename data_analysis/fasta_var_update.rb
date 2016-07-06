@@ -3,22 +3,43 @@ require 'bio'
 require 'bio-samtools'
 
 
-if ARGV.empty?
-   puts "Please provide a fasta file, a vcf file and an short phrase to include in filename as arguments in that order"
-   puts "usage: ruby fasta_var_udpate.rb fasta vcf sample"
-   exit
-else
-   in_fasta = File.expand_path ARGV[0]
-   in_vcf = File.expand_path ARGV[1]
-   sample = ARGV[2].chomp
+def write_variant_to_chr(variants, fas_entry, outfile)
+  chr = fas_entry.entry_id
+  indels = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
+  variants[chr].each_key do | pos |
+    ref = variants[chr][pos][:ref]
+    alt = variants[chr][pos][:alt]
+    if ref.length == alt.length
+      # string index starts at '0', while positions start at '1'
+      fas_entry.seq[pos-1] = alt
+    else # indels
+      indels[pos] = variants[chr][pos]
+    end
+  end
+
+  # decreasing order of positions
+  sorted_pos = indels.keys.sort { |a, b| b <=> a }
+  sorted_pos.each do | pos |
+    len = indels[pos].length
+    if length == 1
+      fas_entry.seq[pos-1] = alt
+    else
+      stop = spos - 1 - len - 1
+      fas_entry.seq[pos-1..stop] = alt
+    end
+  end
+
+  outfile.puts fas_entry.seq.to_fasta(fas_entry.definition, 79)
 end
 
-# a hash of sequences from fasta file
-sequences = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
-Bio::FastaFormat.open(in_fasta).each do |fas|
-  fas.definition += ' ' + sample
-  sequences[fas.entry_id][:def] = fas.definition
-  sequences[fas.entry_id][:seq] = fas.seq
+if ARGV.empty?
+   puts "Please provide a vcf file, a fasta file and an short phrase to include in new filename as arguments in that order"
+   puts "usage: ruby fasta_var_udpate.rb vcf fasta sample"
+   exit
+else
+   in_vcf = File.expand_path ARGV[0]
+   in_fasta = File.expand_path ARGV[1]
+   sample = ARGV[2].chomp
 end
 
 # a hash of variants from vcf file
@@ -30,38 +51,11 @@ File.open(in_vcf, 'r').each do |line|
    variants[v.chrom][v.pos][:alt] = v.alt
 end
 
-indels = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
-variants.each_key do | chr |
-  variants[chr].each_key do | pos |
-    ref = variants[chr][pos][:ref]
-    alt = variants[chr][pos][:alt]
-    if ref.length == alt.length
-      # string index starts at '0', while positions start at '1'
-      sequences[chr][:seq][pos-1] = alt
-    else # indels
-      indels[chr][pos] = variants[chr][pos]
-    end
-  end
-end
-
-indels.each_key do | chr |
-  # decreasing order of positions
-  sorted_pos = indels[chr].keys.sort { |a, b| b <=> a }
-  sorted_pos.each do | pos |
-    len = indels[chr][pos].length
-    if length == 1
-      sequences[chr][:seq][pos-1] = alt
-    else
-      sequences[chr][:seq][pos-1..len-1] = alt
-    end
-  end
-end
-
 out_fasta = File.open(in_fasta + '_' + sample + '.fas', 'w')
-sequences.each_key do | chr |
-  seq = sequences[chr][:seq]
-  id = sequences[chr][:def]
-  out_fasta.puts seq.to_fasta(id, 80)
+# a hash of sequences from fasta file
+sequences = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
+Bio::FastaFormat.open(in_fasta).each do |fas|
+  fas.definition += ' ' + sample
+  write_variant_to_chr(variants, fas, out_fasta)
 end
 out_fasta.close
-
