@@ -49,7 +49,8 @@ def prop_to_counts(hash)
     hash.each_key do | chr |
       hash[chr].each_key do | pos |
         # adjusting proportions to number per 10k
-        hash[chr][pos] = hash[chr][pos] * 10000
+        count = hash[chr][pos] * 10000
+        hash[chr][pos] = count.round
       end
     end
   end
