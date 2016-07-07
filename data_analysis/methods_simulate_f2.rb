@@ -116,6 +116,7 @@ def adjust_prob(hash, position)
       hash[pos] = adj.to_i
     end
   end
+  hash
 end
 
 
