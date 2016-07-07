@@ -1,37 +1,7 @@
 #encoding: utf-8
 require 'bio'
 require 'bio-samtools'
-
-
-def write_variant_to_chr(variants, fas_entry, outfile)
-  chr = fas_entry.entry_id
-  indels = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
-  variants[chr].each_key do | pos |
-    ref = variants[chr][pos][:ref]
-    alt = variants[chr][pos][:alt]
-    if ref.length == alt.length
-      # string index starts at '0', while positions start at '1'
-      fas_entry.seq[pos-1] = alt
-    else # indels
-      indels[pos] = variants[chr][pos]
-    end
-  end
-
-  # decreasing order of positions
-  sorted_pos = indels.keys.sort { |a, b| b <=> a }
-  sorted_pos.each do | pos |
-    len = indels[pos][:ref].length
-    alt = indels[pos][:alt]
-    if len == 1
-      fas_entry.seq[pos-1] = alt
-    else
-      stop = (pos - 1) + (len - 1)
-      fas_entry.seq[pos-1..stop] = alt
-    end
-  end
-
-  outfile.puts fas_entry.seq.to_fasta(fas_entry.definition, 79)
-end
+require_relative 'update_chr_seq'
 
 if ARGV.empty?
    puts "Please provide a vcf file, a fasta file and an short phrase to include in new filename as arguments in that order"
@@ -57,6 +27,7 @@ out_fasta = File.open(in_fasta + '_' + sample + '.fas', 'w')
 sequences = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
 Bio::FastaFormat.open(in_fasta).each do |fas|
   fas.definition += ' ' + sample
-  write_variant_to_chr(variants, fas, out_fasta)
+  fas = update_variant_to_chr(variants, fas)
+  out_fasta.puts fas.seq.to_fasta(fas.definition, 79)
 end
 out_fasta.close
