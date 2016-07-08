@@ -4,6 +4,7 @@ require 'bio-samtools'
 require 'pickup'
 require 'yaml'
 require_relative 'methods_simulate_f2'
+require_relative 'update_chr_seq'
 
 if ARGV.empty?
    puts "Please provide directory path of configs.yaml file as argument"
@@ -15,6 +16,7 @@ end
 pars = YAML.load_file("#{indir}/configs.yml")
 in_vcf = File.expand_path pars['in_vcf']
 xover_file = File.expand_path pars['xovers']
+in_fasta = File.expand_path pars['in_fasta']
 progeny_num = pars['progeny']
 chrs = pars['chrs']
 recomb_rate = 0.3
@@ -61,7 +63,7 @@ chrs.each_key do | chr |
 end
 
 # warn "#{gametes}"
-
+counter = 0
 progeny = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recombined gamets
 chrs.each_key do | chr |
   counter = 0 # counter for progeny
@@ -71,7 +73,7 @@ chrs.each_key do | chr |
     gender_recomb_hash.each_key do | type |
       count = gender_recomb_hash[type]
       index = gametes[chr][count][type].keys.sample
-      progeny[chr][counter][type] = gametes[chr][count][type][index][one]
+      progeny[counter][type][chr] = gametes[chr][count][type][index][one]
       gametes[chr][count][type][index].delete(one)
       one = two
     end
@@ -81,4 +83,21 @@ end
 
 warn "#{progeny}"
 
+for number in 0..(counter-1)
+  sample = "progeny_" + number.to_s
+  [:male, :female].each do | type |
+    out_fasta = File.open(in_fasta + type.to_s + sample + '.fas', 'w')
+    Bio::FastaFormat.open(in_fasta).each do |fas|
+      fas.definition += ' ' + sample
+      if progeny[number][type][fas.entry_id] == 'wildtype'
+        # no change in sequence
+        out_fasta.puts fas.seq.to_fasta(fas.definition, 79)
+      else
+        fas = update_variant_to_chr(progeny[number][type], fas)
+        out_fasta.puts fas.seq.to_fasta(fas.definition, 79)
+      end
+    end
+    out_fasta.close
+  end
+end
 
