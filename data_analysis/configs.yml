@@ -6,7 +6,9 @@ xovers: 'crossovers.txt'
 # combined chromsomal sequences for arabidopsis pooled from following link
 # ftp://ftp.arabidopsis.org/home/tair/Sequences/whole_chromosomes/
 in_fasta: 'TAIR10_gDNA.fas'
-progeny: 1
+progeny: 48
+mutation:
+  Chr3: 1405085
 # chromosome number and details
 # for each chromosomes must include length
 # shape and rate are optional, if not provided will be calculated
