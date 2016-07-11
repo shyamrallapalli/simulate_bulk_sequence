@@ -5,6 +5,7 @@ require 'pickup'
 require 'yaml'
 require_relative 'methods_simulate_f2'
 require_relative 'update_chr_seq'
+require 'fileutils'
 
 if ARGV.empty?
   puts "Please provide directory path of configs.yaml file as argument"
@@ -80,35 +81,39 @@ chrs.each_key do | chr |
   end
 end
 
+File.open("selected_progeny.yml", 'w') do |file|
+  file.write bulks.to_yaml
+end
+
 # a hash for bulks
 bulks = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
 mut_chr = mutation.keys[0]
 mut_pos = mutation[mut_chr]
-progeny.each_key do | number |
+mut_dir = indir + "/mutant"
+wt_dir = indir + "/wildtype"
+FileUtils.mkdir_p mut_dir
+FileUtils.mkdir_p wt_dir
+for number in 0..(counter-1)
   if progeny[number][:male][mut_chr].key?(mut_pos) and
     progeny[number][:female][mut_chr].key?(mut_pos)
-    bulks[:mutant][number] = progeny[number]
+    bulks[:mutant][number] = 1
+    sample = "mutant_progeny_" + number.to_s
+    FileUtils.chdir(mut_dir)
   else
-    bulks[:wildtype][number] = progeny[number]
+    bulks[:wildtype][number] = 1
+    sample = "wildtype_progeny_" + number.to_s
+    FileUtils.chdir(wt_dir)
   end
-end
-
-File.open("selected_bulks.yml", 'w') do |file|
-  file.write bulks.to_yaml
-end
-
-for number in 0..(counter-1)
-  sample = "progeny_" + number.to_s
   [:male, :female].each do | type |
-    out_fasta = File.open(in_fasta + type.to_s + sample + '.fas', 'w')
+    out_fasta = File.open(sample + type.to_s + '.fas', 'w')
     Bio::FastaFormat.open(in_fasta).each do |fas|
       fas.definition += ' ' + sample
       if progeny[number][type][fas.entry_id] == {}
         # no change in sequence
-        out_fasta.puts fas.seq.to_fasta(fas.definition, 79)
+        out_fasta.puts fas.seq.to_fasta(fas.definition, 80)
       else
         fas = update_variant_to_chr(progeny[number][type], fas)
-        out_fasta.puts fas.seq.to_fasta(fas.definition, 79)
+        out_fasta.puts fas.seq.to_fasta(fas.definition, 80)
       end
     end
     out_fasta.close
