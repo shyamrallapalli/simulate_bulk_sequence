@@ -81,7 +81,10 @@ chrs.each_key do | chr |
   end
 end
 
-warn "#{progeny}"
+File.open("selected_progeny.yml", 'w') do |file|
+  file.write progeny.to_yaml
+end
+
 
 for number in 0..(counter-1)
   sample = "progeny_" + number.to_s
