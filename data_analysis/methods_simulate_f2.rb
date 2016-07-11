@@ -127,7 +127,7 @@ def recombined_chromosome(recomb_positions, markers)
   if recomb_positions.empty?
     one, two = randomize_pair
     recomb_chr[one] = markers
-    recomb_chr[two] = 'wildtype'
+    recomb_chr[two] = {}
   # if 1 or more recombination present split markers
   else
     index = 0

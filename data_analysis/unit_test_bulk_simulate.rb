@@ -102,7 +102,7 @@ class TestBulkSimulate < Test::Unit::TestCase
 
   def test_no_recombined_chr
     recomb_chr = recombined_chromosome([], @markers)
-    if recomb_chr[:one] == 'wildtype'
+    if recomb_chr[:one] == {}
       test = recomb_chr[:two]
     else
       test = recomb_chr[:one]
