@@ -7,10 +7,11 @@ require_relative 'methods_simulate_f2'
 require_relative 'update_chr_seq'
 
 if ARGV.empty?
-   puts "Please provide directory path of configs.yaml file as argument"
+  puts "Please provide directory path of configs.yaml file as argument"
 else
-   indir = File.expand_path ARGV[0] # location of config file about recombination frequency and number fo chromosomes
-   Dir.chdir(indir)
+  # location of config file about recombination frequency and number fo chromosomes
+  indir = File.expand_path ARGV[0]
+  Dir.chdir(indir)
 end
 
 pars = YAML.load_file("#{indir}/configs.yml")
@@ -21,21 +22,17 @@ progeny_num = pars['progeny']
 chrs = pars['chrs']
 recomb_rate = 0.3
 
-markers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash of variants from vcf file
+# a hash of variants from vcf file
+markers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
 File.open(in_vcf, 'r').each do |line|
-   next if line =~ /^#/
-   v = Bio::DB::Vcf.new(line)
-   markers[v.chrom][v.pos][:ref] = v.ref
-   markers[v.chrom][v.pos][:alt] = v.alt
-   # info = v.info
-   # if info["HET"] == "1"
-   #    markers[v.chrom][v.pos][:type] = 'het'
-   # elsif info["HOM"] == "1"
-   #    markers[v.chrom][v.pos][:type] = 'hom'
-   # end
+  next if line =~ /^#/
+  v = Bio::DB::Vcf.new(line)
+  markers[v.chrom][v.pos][:ref] = v.ref
+  markers[v.chrom][v.pos][:alt] = v.alt
 end
 
-xovers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash of cross over position and prop
+# a hash of cross over position and prop
+xovers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
 File.open(xover_file, 'r').each do |line|
   info = line.split(/\t/)
   next if info[1] !~ /^\d/
@@ -46,8 +43,8 @@ end
 chrs = recombinant_progeny(chrs, progeny_num)
 xovers = prop_to_counts(xovers)
 
-gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recombined gamets
-
+ # a hash for recombined gamets
+gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
 chrs.each_key do | chr |
   # a counter to index recombined chromosomes at different recombinations per chromosome
   counter = 0
@@ -62,9 +59,9 @@ chrs.each_key do | chr |
   end
 end
 
-# warn "#{gametes}"
 counter = 0
-progeny = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) } # a hash for recombined gamets
+ # a hash for recombined progeny
+progeny = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
 chrs.each_key do | chr |
   counter = 0 # counter for progeny
   chrs[chr][:progeny].each do | num_xos |

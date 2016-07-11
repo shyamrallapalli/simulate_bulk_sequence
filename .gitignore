@@ -1,2 +1,4 @@
 *.Rhistory
 literature/
+data_analysis/test_data/
+TAIR10_gDNA.fas
