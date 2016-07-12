@@ -6,6 +6,7 @@ require 'yaml'
 require_relative 'methods_simulate_f2'
 require_relative 'update_chr_seq'
 require 'fileutils'
+require 'rinruby'
 
 if ARGV.empty?
   puts "Please provide directory path of configs.yaml file as argument"
@@ -82,7 +83,7 @@ chrs.each_key do | chr |
 end
 
 File.open("selected_progeny.yml", 'w') do |file|
-  file.write bulks.to_yaml
+  file.write progeny.to_yaml
 end
 
 # a hash for bulks
@@ -120,3 +121,9 @@ for number in 0..(counter-1)
   end
 end
 
+myr = RinRuby.new(:echo => false)
+myr.assign 'mt', bulks[:mutant].length
+myr.assign 'wt', bulks[:wildtype].length
+pval = myr.pull('chisq.test(c(mt,wt), p = c(0.25,0.75))$p.value')
+warn "mutants\t#{bulks[:mutant].length}\twildtype\t#{bulks[:wildtype].length}"
+warn "Chi-squared test p value for recessive trait probability\t#{pval}"
