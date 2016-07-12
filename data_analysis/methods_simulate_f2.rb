@@ -66,6 +66,7 @@ def recombination_positions(count_hash, number)
   pos_pool = Pickup.new(new_hash, uniq: true)
   if number > 1
     for i in 1..number
+      # selected = select_non_nil_position(pos_pool, new_hash, number)
       selected = select_non_nil_position(pos_pool)
       positions << selected
       # no need to adjust after the last recombination
@@ -76,6 +77,7 @@ def recombination_positions(count_hash, number)
       pos_pool = Pickup.new(new_hash, uniq: true)
     end
   else
+    # selected = select_non_nil_position(pos_pool, new_hash, number)
     selected = select_non_nil_position(pos_pool)
     positions << selected
   end
@@ -83,8 +85,13 @@ def recombination_positions(count_hash, number)
 end
 
 
+# code for getting weights hash from nil results
+#def select_non_nil_position(pickup_obj, hash, num)
 def select_non_nil_position(pickup_obj)
   selected = pickup_obj.pick(1)
+  # if selected == nil
+  #   warn "pickup nil\t#{num}\n#{hash}"
+  # end
   until selected != nil
     selected = pickup_obj.pick(1)
   end
@@ -109,8 +116,8 @@ end
 def adjust_prob(hash, position)
   hash.each_key do | pos |
     diff = (pos - position).abs
-    # 3 Mb is the cut off on either side
-    cutoff = 3000000
+    # 1 Mb is the cut off on either side
+    cutoff = 1000000
     if diff < cutoff
       adj = hash[pos] * (diff/cutoff)
       hash[pos] = adj.to_i
