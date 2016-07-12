@@ -1,0 +1,21 @@
+⇒  for i in {1..10}; do ruby simulate_f2_pop.rb .; done
+mutants 13  wildtype  35
+Chi-squared test p value for recessive trait probability  0.7388826803635273
+mutants 12  wildtype  36
+Chi-squared test p value for recessive trait probability  1.0
+mutants 15  wildtype  33
+Chi-squared test p value for recessive trait probability  0.31731050786291415
+mutants 12  wildtype  36
+Chi-squared test p value for recessive trait probability  1.0
+mutants 9 wildtype  39
+Chi-squared test p value for recessive trait probability  0.31731050786291415
+mutants 8 wildtype  40
+Chi-squared test p value for recessive trait probability  0.1824224394517358
+mutants 5 wildtype  43
+Chi-squared test p value for recessive trait probability  0.019630657257290657
+mutants 12  wildtype  36
+Chi-squared test p value for recessive trait probability  1.0
+mutants 17  wildtype  31
+Chi-squared test p value for recessive trait probability  0.09558070454562882
+mutants 9 wildtype  39
+Chi-squared test p value for recessive trait probability  0.31731050786291415
