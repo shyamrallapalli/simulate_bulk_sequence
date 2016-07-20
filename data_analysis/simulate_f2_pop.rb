@@ -66,23 +66,27 @@ def get_recomb_gametes(chrs, xovers, markers)
   gametes
 end
 
-counter = 0
- # a hash for recombined progeny
-progeny = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
-chrs.each_key do | chr |
-  counter = 0 # counter for progeny
-  chrs[chr][:progeny].each do | num_xos |
-    gender_recomb_hash = recombinant_gender_num(num_xos)
-    one, two = randomize_pair
-    gender_recomb_hash.each_key do | type |
-      count = gender_recomb_hash[type]
-      index = gametes[chr][count][type].keys.sample
-      progeny[counter][type][chr] = gametes[chr][count][type][index][one]
-      gametes[chr][count][type][index].delete(one)
-      one = two
+def get_recomb_progeny(chrs, gametes)
+  # a hash for recombined progeny
+  progeny = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
+  chrs.each_key do | chr |
+    counter = 0 # counter for progeny
+    chrs[chr][:progeny].each do | num_xos |
+      gender_recomb_hash = recombinant_gender_num(num_xos)
+      one, two = randomize_pair
+      gender_recomb_hash.each_key do | type |
+        count = gender_recomb_hash[type]
+        # getting a random element from an array of selected recombination number and gender type
+        index = gametes[chr][count][type].keys.sample
+        progeny[counter][type][chr] = gametes[chr][count][type][index][one]
+        # deleting the gamete that has been used
+        gametes[chr][count][type][index].delete(one)
+        one = two
+      end
+      counter += 1
     end
-    counter += 1
   end
+  progeny
 end
 
 File.open("selected_progeny.yml", 'w') do |file|
