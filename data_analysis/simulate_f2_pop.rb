@@ -47,20 +47,23 @@ end
 chrs = recombinant_progeny(chrs, progeny_num)
 xovers = prop_to_counts(xovers)
 
- # a hash for recombined gamets
-gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
-chrs.each_key do | chr |
-  # a counter to index recombined chromosomes at different recombinations per chromosome
-  counter = 0
-  chrs[chr][:gametes].each do | num_xos |
-    gender_recomb_hash = recombinant_gender_num(num_xos)
-    gender_recomb_hash.each_key do | type |
-      count = gender_recomb_hash[type]
-      recom_pos = recombination_positions(xovers[chr], count)
-      gametes[chr][count][type][counter] = recombined_chromosome(recom_pos, markers[chr])
+def get_recomb_gametes(chrs, xovers, markers)
+  # a hash for recombined gamets
+  gametes = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
+  chrs.each_key do | chr |
+    # a counter to index recombined chromosomes at different recombinations per chromosome
+    counter = 0
+    chrs[chr][:gametes].each do | num_xos |
+      gender_recomb_hash = recombinant_gender_num(num_xos)
+      gender_recomb_hash.each_key do | type |
+        count = gender_recomb_hash[type]
+        recom_pos = recombination_positions(xovers[chr], count)
+        gametes[chr][count][type][counter] = recombined_chromosome(recom_pos, markers[chr])
+      end
+      counter += 1
     end
-    counter += 1
   end
+  gametes
 end
 
 counter = 0
