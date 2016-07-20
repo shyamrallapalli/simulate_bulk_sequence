@@ -108,6 +108,8 @@ def get_recomb_progeny(chrs, gametes)
   progeny
 end
 
+gametes = get_recomb_gametes(chrs, xovers, markers)
+progeny = get_recomb_progeny(chrs, gametes)
 File.open("selected_progeny.yml", 'w') do |file|
   file.write progeny.to_yaml
 end
@@ -120,7 +122,7 @@ mut_dir = indir + "/mutant"
 wt_dir = indir + "/wildtype"
 FileUtils.mkdir_p mut_dir
 FileUtils.mkdir_p wt_dir
-for number in 0..(counter-1)
+for number in 0..(progeny_num-1)
   if progeny[number][:male][mut_chr].key?(mut_pos) and
     progeny[number][:female][mut_chr].key?(mut_pos)
     bulks[:mutant][number] = 1
