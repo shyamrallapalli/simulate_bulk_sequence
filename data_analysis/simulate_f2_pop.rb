@@ -9,7 +9,10 @@ require 'fileutils'
 require 'rinruby'
 
 if ARGV.empty?
-  puts "Please provide directory path of configs.yaml file as argument"
+  puts 'Please provide path of directory containing configs.yaml file as argument
+  and config file should include a vcf file for markers, location of xovers file,
+  a fasta file, position of mutation and either number of progeny or number of mutants to bulk'
+  exit
 else
   # location of config file about recombination frequency and number fo chromosomes
   indir = File.expand_path ARGV[0]
@@ -17,10 +20,26 @@ else
 end
 
 pars = YAML.load_file("#{indir}/configs.yml")
+unless pars.key?('in_vcf') && pars.key?('xovers') &&
+  pars.key?('in_fasta') && pars.key?('mutation')
+  puts 'missing either vcf or xovers or fasta or muation position'
+  exit
+end
+if pars.key?('progeny') || pars.key?('mut_progeny')
+  if pars.key?('mut_progeny')
+    progeny_num = 10 * pars['mut_progeny']
+  else
+    progeny_num = pars['progeny']
+  end
+else
+  puts 'missing either progeny or mutant progeny number'
+  exit
+end
+warn "#{progeny_num}"
+
 in_vcf = File.expand_path pars['in_vcf']
 xover_file = File.expand_path pars['xovers']
 in_fasta = File.expand_path pars['in_fasta']
-progeny_num = pars['progeny']
 chrs = pars['chrs']
 recomb_rate = 0.3
 mutation = pars['mutation']
