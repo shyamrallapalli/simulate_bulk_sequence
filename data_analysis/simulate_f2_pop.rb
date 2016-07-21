@@ -37,7 +37,6 @@ else
   puts 'missing either progeny or mutant progeny number'
   exit
 end
-warn "#{progeny_num}"
 
 in_vcf = File.expand_path pars['in_vcf']
 xover_file = File.expand_path pars['xovers']
@@ -45,6 +44,7 @@ in_fasta = File.expand_path pars['in_fasta']
 chrs = pars['chrs']
 recomb_rate = 0.3
 mutation = pars['mutation']
+generate_seqs = pars['generate_seqs']
 
 
 # a hash of variants from vcf file
@@ -116,38 +116,40 @@ File.open("selected_progeny.yml", 'w') do |file|
   file.write progeny.to_yaml
 end
 
-# a hash for bulks
-bulks = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
-mut_chr = mutation.keys[0]
-mut_pos = mutation[mut_chr]
-mut_dir = indir + "/mutant"
-wt_dir = indir + "/wildtype"
-FileUtils.mkdir_p mut_dir
-FileUtils.mkdir_p wt_dir
-for number in 0..(progeny_num-1)
-  if progeny[number][:male][mut_chr].key?(mut_pos) and
-    progeny[number][:female][mut_chr].key?(mut_pos)
-    bulks[:mutant][number] = 1
-    sample = "mutant_progeny_" + number.to_s
-    FileUtils.chdir(mut_dir)
-  else
-    bulks[:wildtype][number] = 1
-    sample = "wildtype_progeny_" + number.to_s
-    FileUtils.chdir(wt_dir)
-  end
-  [:male, :female].each do | type |
-    out_fasta = File.open(sample + type.to_s + '.fas', 'w')
-    Bio::FastaFormat.open(in_fasta).each do |fas|
-      fas.definition += ' ' + sample
-      if progeny[number][type][fas.entry_id] == {}
-        # no change in sequence
-        out_fasta.puts fas.seq.to_fasta(fas.definition, 80)
-      else
-        fas = update_variant_to_chr(progeny[number][type], fas)
-        out_fasta.puts fas.seq.to_fasta(fas.definition, 80)
-      end
+if generate_seqs
+  # a hash for bulks
+  bulks = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
+  mut_chr = mutation.keys[0]
+  mut_pos = mutation[mut_chr]
+  mut_dir = indir + "/mutant"
+  wt_dir = indir + "/wildtype"
+  FileUtils.mkdir_p mut_dir
+  FileUtils.mkdir_p wt_dir
+  for number in 0..(progeny_num-1)
+    if progeny[number][:male][mut_chr].key?(mut_pos) and
+      progeny[number][:female][mut_chr].key?(mut_pos)
+      bulks[:mutant][number] = 1
+      sample = "mutant_progeny_" + number.to_s
+      FileUtils.chdir(mut_dir)
+    else
+      bulks[:wildtype][number] = 1
+      sample = "wildtype_progeny_" + number.to_s
+      FileUtils.chdir(wt_dir)
     end
-    out_fasta.close
+    [:male, :female].each do | type |
+      out_fasta = File.open(sample + type.to_s + '.fas', 'w')
+      Bio::FastaFormat.open(in_fasta).each do |fas|
+        fas.definition += ' ' + sample
+        if progeny[number][type][fas.entry_id] == {}
+          # no change in sequence
+          out_fasta.puts fas.seq.to_fasta(fas.definition, 80)
+        else
+          fas = update_variant_to_chr(progeny[number][type], fas)
+          out_fasta.puts fas.seq.to_fasta(fas.definition, 80)
+        end
+      end
+      out_fasta.close
+    end
   end
 end
 
