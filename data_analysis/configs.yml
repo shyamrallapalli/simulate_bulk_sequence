@@ -1,16 +1,31 @@
 # specify the names of input files
-# markers as vcf file (both homozygous and heterozygous are used)
+# markers as vcf file (both homozygous and heterozygous variants are used)
 in_vcf: 'snps.vcf'
-# recombination positions and probabilities
+
+# recombination positions and probabilities/weights
 xovers: 'crossovers.txt'
-# combined chromsomal sequences for arabidopsis pooled from following link
+
+# combined chromsomal sequences for arabidopsis were pooled from following link
 # ftp://ftp.arabidopsis.org/home/tair/Sequences/whole_chromosomes/
 in_fasta: 'TAIR10_gDNA.fas'
+
+# option to generate recombinant bulks fasta files with markers/variants
+generate_seqs: yes
+
+# progeny number is number of individuals to generate from F2
+# bulk number is number of individuals to pool for wt and mutant bulks
+# use one of progeny or bulk_num, if both were given bulk_num is used
+# if only progeny number is given then number of individuals
+# carrying murtation will be used as the number to pool
 progeny: 48
+bulk_num: 20
+
+# mutation position
 mutation:
   Chr3: 1405085
+
 # chromosome number and details
-# for each chromosomes must include length
+# for each chromosome, length must be included
 # shape and rate are optional, if not provided will be calculated
 chrs:
   Chr1:

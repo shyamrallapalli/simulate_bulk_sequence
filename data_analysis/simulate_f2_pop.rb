@@ -25,9 +25,11 @@ unless pars.key?('in_vcf') && pars.key?('xovers') &&
   puts 'missing either vcf or xovers or fasta or muation position'
   exit
 end
-if pars.key?('progeny') || pars.key?('mut_progeny')
-  if pars.key?('mut_progeny')
-    progeny_num = 10 * pars['mut_progeny']
+
+# number of individuals to generate or bulk
+if pars.key?('progeny') || pars.key?('bulk_num')
+  if pars.key?('bulk_num')
+    progeny_num = 10 * pars['bulk_num']
   else
     progeny_num = pars['progeny']
   end
