@@ -87,9 +87,12 @@ def get_recomb_gametes(chrs, xovers, markers)
   gametes
 end
 
-def get_recomb_progeny(chrs, gametes)
+def get_recomb_progeny(chrs, gametes, muation)
   # a hash for recombined progeny
   progeny = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
+  mut_chr = mutation.keys[0]
+  mut_pos = mutation[mut_chr]
+
   chrs.each_key do | chr |
     counter = 0 # counter for progeny
     chrs[chr][:progeny].each do | num_xos |
@@ -107,6 +110,14 @@ def get_recomb_progeny(chrs, gametes)
       counter += 1
     end
   end
+
+  myr = RinRuby.new(:echo => false)
+  myr.assign 'mt', bulks[:mutant].length
+  myr.assign 'wt', bulks[:wildtype].length
+  pval = myr.pull('chisq.test(c(mt,wt), p = c(0.25,0.75))$p.value')
+  warn "mutants\t#{bulks[:mutant].length}\twildtype\t#{bulks[:wildtype].length}"
+  warn "Chi-squared test p value for recessive trait probability\t#{pval}"
+
   progeny
 end
 
@@ -153,9 +164,3 @@ if generate_seqs
   end
 end
 
-myr = RinRuby.new(:echo => false)
-myr.assign 'mt', bulks[:mutant].length
-myr.assign 'wt', bulks[:wildtype].length
-pval = myr.pull('chisq.test(c(mt,wt), p = c(0.25,0.75))$p.value')
-warn "mutants\t#{bulks[:mutant].length}\twildtype\t#{bulks[:wildtype].length}"
-warn "Chi-squared test p value for recessive trait probability\t#{pval}"
