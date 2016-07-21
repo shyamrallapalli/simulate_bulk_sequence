@@ -22,7 +22,7 @@ end
 pars = YAML.load_file("#{indir}/configs.yml")
 unless pars.key?('in_vcf') && pars.key?('xovers') &&
   pars.key?('in_fasta') && pars.key?('mutation')
-  puts 'missing either vcf or xovers or fasta or muation position'
+  puts 'missing either vcf or xovers or fasta or mutation position'
   exit
 end
 
@@ -87,17 +87,19 @@ def get_recomb_gametes(chrs, xovers, markers)
   gametes
 end
 
-def get_recomb_progeny(chrs, gametes, muation)
+def get_recomb_progeny(chrs, gametes, mutation, progeny_num)
   # a hash for recombined progeny
   progeny = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
   mut_chr = mutation.keys[0]
   mut_pos = mutation[mut_chr]
+  mutant_num = 0
 
   chrs.each_key do | chr |
     counter = 0 # counter for progeny
     chrs[chr][:progeny].each do | num_xos |
       gender_recomb_hash = recombinant_gender_num(num_xos)
       one, two = randomize_pair
+      mut_test = {:female => 0, :male => 0}
       gender_recomb_hash.each_key do | type |
         count = gender_recomb_hash[type]
         # getting a random element from an array of selected recombination number and gender type
@@ -106,23 +108,34 @@ def get_recomb_progeny(chrs, gametes, muation)
         # deleting the gamete that has been used
         gametes[chr][count][type][index].delete(one)
         one = two
+        # checking if progeny has mutation
+        if chr == mut_chr
+          if progeny[counter][type][mut_chr].key?(mut_pos)
+            mut_test[type] = 1
+          end
+        end
+      end
+      if chr == mut_chr
+        if mut_test[:female] == 1 and mut_test[:male] == 1
+          mutant_num += 1
+          warn "added 1 to mutnat number"
+        end
       end
       counter += 1
     end
   end
 
   myr = RinRuby.new(:echo => false)
-  myr.assign 'mt', bulks[:mutant].length
-  myr.assign 'wt', bulks[:wildtype].length
+  myr.assign 'mt', mutant_num
+  myr.assign 'wt', progeny_num - mutant_num
   pval = myr.pull('chisq.test(c(mt,wt), p = c(0.25,0.75))$p.value')
-  warn "mutants\t#{bulks[:mutant].length}\twildtype\t#{bulks[:wildtype].length}"
+  warn "mutants\t#{mutant_num}\twildtype\t#{progeny_num - mutant_num}"
   warn "Chi-squared test p value for recessive trait probability\t#{pval}"
-
   progeny
 end
 
 gametes = get_recomb_gametes(chrs, xovers, markers)
-progeny = get_recomb_progeny(chrs, gametes)
+progeny = get_recomb_progeny(chrs, gametes, mutation, progeny_num)
 File.open("selected_progeny.yml", 'w') do |file|
   file.write progeny.to_yaml
 end

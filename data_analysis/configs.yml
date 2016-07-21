@@ -10,7 +10,8 @@ xovers: 'crossovers.txt'
 in_fasta: 'TAIR10_gDNA.fas'
 
 # option to generate recombinant bulks fasta files with markers/variants
-generate_seqs: yes
+# set this either true or false
+generate_seqs: false
 
 # progeny number is number of individuals to generate from F2
 # bulk number is number of individuals to pool for wt and mutant bulks
@@ -18,7 +19,7 @@ generate_seqs: yes
 # if only progeny number is given then number of individuals
 # carrying murtation will be used as the number to pool
 progeny: 48
-bulk_num: 20
+# bulk_num: 20
 
 # mutation position
 mutation:
