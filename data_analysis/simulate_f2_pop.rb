@@ -92,7 +92,7 @@ def get_recomb_progeny(chrs, gametes, mutation, progeny_num)
   progeny = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
   mut_chr = mutation.keys[0]
   mut_pos = mutation[mut_chr]
-  mutant_num = 0
+  mut_progeny_index = []
 
   chrs.each_key do | chr |
     counter = 0 # counter for progeny
@@ -104,27 +104,34 @@ def get_recomb_progeny(chrs, gametes, mutation, progeny_num)
         count = gender_recomb_hash[type]
         # getting a random element from an array of selected recombination number and gender type
         index = gametes[chr][count][type].keys.sample
-        progeny[counter][type][chr] = gametes[chr][count][type][index][one]
+        progeny[:wt][counter][type][chr] = gametes[chr][count][type][index][one]
         # deleting the gamete that has been used
         gametes[chr][count][type][index].delete(one)
         one = two
         # checking if progeny has mutation
         if chr == mut_chr
-          if progeny[counter][type][mut_chr].key?(mut_pos)
+          if progeny[:wt][counter][type][mut_chr].key?(mut_pos)
             mut_test[type] = 1
           end
         end
       end
       if chr == mut_chr
         if mut_test[:female] == 1 and mut_test[:male] == 1
-          mutant_num += 1
-          warn "added 1 to mutnat number"
+          mut_progeny_index << counter
         end
       end
       counter += 1
     end
   end
 
+  progeny[:wt].each_key do | index |
+    if mut_progeny_index.include?(index)
+      progeny[:mut][index] = progeny[:wt][index]
+      progeny[:wt].delete(index)
+    end
+  end
+
+  mutant_num = mut_progeny_index.length
   myr = RinRuby.new(:echo => false)
   myr.assign 'mt', mutant_num
   myr.assign 'wt', progeny_num - mutant_num
