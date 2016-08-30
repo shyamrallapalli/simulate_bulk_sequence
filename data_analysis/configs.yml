@@ -26,7 +26,7 @@ progeny: 48
 pop_num: 10
 
 # percent mis-phenotyping or sampling error fraction
-error: 0.1
+error_frac: 0.1
 
 # way of mis-phenotyping or sampling error (two ways)
 # swap = swapping wt and mutant between bulks

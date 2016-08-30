@@ -49,11 +49,11 @@ mutation = pars['mutation']
 generate_seqs = pars['generate_seqs']
 
 # number of bulk population to simulate
-if pars.key?('pop_num')
-  pop_num = pars['pop_num']
-else
-  pop_num = 1
-end
+pop_num = pars['pop_num'] ? pars['pop_num'] : 1
+
+# sampling error parameters
+error_frac = pars['error_frac'] ? pars['error_frac'] : 0.0
+error_type = pars['error_type'] ? pars['error_type'] : 'replace'
 
 # a hash of variants from vcf file
 markers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
