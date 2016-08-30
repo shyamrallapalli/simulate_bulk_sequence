@@ -151,40 +151,48 @@ def get_recomb_progeny(chrs, gametes, mutation, progeny_num)
   [progeny, mutant_num]
 end
 
-gametes = get_recomb_gametes(chrs, xovers, markers)
-progeny, mutant_num = get_recomb_progeny(chrs, gametes, mutation, progeny_num)
-File.open("selected_progeny.yml", 'w') do |file|
-  file.write progeny.to_yaml
-end
+i = 1
+while i <= pop_num
+  cwd = indir + "/bulk_pop_" + i
+  FileUtils.mkdir_p dir
+  FileUtils.chdir(dir)
+  gametes = get_recomb_gametes(chrs, xovers, markers)
+  progeny, mutant_num = get_recomb_progeny(chrs, gametes, mutation, progeny_num)
+  File.open("selected_progeny.yml", 'w') do |file|
+    file.write progeny.to_yaml
+  end
 
-# set mutant number as individuals to pool if bulk_num is nil
-bulk_num = mutant_num if bulk_num == nil
-if generate_seqs
-  [:wt, :mut].each do | group |
-    dir = indir + "/pool_" + group.to_s
-    FileUtils.mkdir_p dir
-    FileUtils.chdir(dir)
-    # counter for number pooled
-    i = 0
-    progeny[group].each_key do | number |
-      sample = group.to_s + "_progeny_" + number.to_s
-      [:male, :female].each do | type |
-        out_fasta = File.open(sample + type.to_s + '.fas', 'w')
-        Bio::FastaFormat.open(in_fasta).each do |fas|
-          fas.definition += ' ' + sample
-          if progeny[group][number][type][fas.entry_id] == {}
-            # no change in sequence
-            out_fasta.puts fas.seq.to_fasta(fas.definition, 80)
-          else
-            fas = update_variant_to_chr(progeny[group][number][type], fas)
-            out_fasta.puts fas.seq.to_fasta(fas.definition, 80)
+  # set mutant number as individuals to pool if bulk_num is nil
+  bulk_num = mutant_num if bulk_num == nil
+  if generate_seqs
+    [:wt, :mut].each do | group |
+      dir = cwd + "/pool_" + group.to_s
+      FileUtils.mkdir_p dir
+      FileUtils.chdir(dir)
+      # counter for number pooled
+      i = 0
+      progeny[group].each_key do | number |
+        sample = group.to_s + "_progeny_" + number.to_s
+        [:male, :female].each do | type |
+          out_fasta = File.open(sample + type.to_s + '.fas', 'w')
+          Bio::FastaFormat.open(in_fasta).each do |fas|
+            fas.definition += ' ' + sample
+            if progeny[group][number][type][fas.entry_id] == {}
+              # no change in sequence
+              out_fasta.puts fas.seq.to_fasta(fas.definition, 80)
+            else
+              fas = update_variant_to_chr(progeny[group][number][type], fas)
+              out_fasta.puts fas.seq.to_fasta(fas.definition, 80)
+            end
           end
+          out_fasta.close
         end
-        out_fasta.close
+        i += 1
+        break if i >= bulk_num
       end
-      i += 1
-      break if i >= bulk_num
     end
   end
-end
 
+  # increment bulk pop number
+  i += 1
+end
