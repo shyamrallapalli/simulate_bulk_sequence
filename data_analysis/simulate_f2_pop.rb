@@ -48,6 +48,12 @@ recomb_rate = 0.3
 mutation = pars['mutation']
 generate_seqs = pars['generate_seqs']
 
+# number of bulk population to simulate
+if pars['pop_num']
+  pop_num = pars['pop_num']
+else
+  pop_num = 1
+end
 
 # a hash of variants from vcf file
 markers = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }

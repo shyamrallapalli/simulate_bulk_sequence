@@ -21,6 +21,10 @@ generate_seqs: false
 progeny: 48
 # bulk_num: 20
 
+# number of bulk population to simulate
+# default it will be one
+pop_num: 10
+
 # mutation position
 mutation:
   Chr3: 1405085
