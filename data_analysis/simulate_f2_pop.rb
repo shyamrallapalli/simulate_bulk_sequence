@@ -151,11 +151,12 @@ def get_recomb_progeny(chrs, gametes, mutation, progeny_num)
   [progeny, mutant_num]
 end
 
-i = 1
+n = 1
 puts "Number of bulk populations\t#{pop_num}"
-while i <= pop_num
-  puts "current bulk population\t#{i}"
-  cwd = indir + "/bulk_pop_" + i.to_s
+puts "progress of bulk simulation"
+while n <= pop_num
+  puts "#{n}"
+  cwd = indir + "/bulk_pop_" + n.to_s
   FileUtils.mkdir_p cwd
   FileUtils.chdir(cwd)
   gametes = get_recomb_gametes(chrs, xovers, markers)
@@ -166,6 +167,16 @@ while i <= pop_num
 
   # set mutant number as individuals to pool if bulk_num is nil
   bulk_num = mutant_num if bulk_num == nil
+
+  # calculating error number and setting additional wt individuals to choose
+  # if replace method is used to create sampling error
+  error_num = (bulk_num * error_frac).ceil
+  if error_type == 'replace' and error_num > 0
+    wt_num = bulk_num + error_num
+  else
+    wt_num = bulk_num
+  end
+
   if generate_seqs
     [:wt, :mut].each do | group |
       dir = cwd + "/pool_" + group.to_s
@@ -190,11 +201,13 @@ while i <= pop_num
           out_fasta.close
         end
         i += 1
-        break if i >= bulk_num
+        # breaking the loop depending on type of the bulk group
+        break if group == :mut and i >= bulk_num
+        break if group == :wt and i >= wt_num
       end
     end
   end
 
   # increment bulk pop number
-  i += 1
+  n += 1
 end
