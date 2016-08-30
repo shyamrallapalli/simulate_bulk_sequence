@@ -144,8 +144,10 @@ def get_recomb_progeny(chrs, gametes, mutation, progeny_num)
   myr.assign 'mt', mutant_num
   myr.assign 'wt', progeny_num - mutant_num
   pval = myr.pull('chisq.test(c(mt,wt), p = c(0.25,0.75))$p.value')
-  warn "mutants\t#{mutant_num}\twildtype\t#{progeny_num - mutant_num}"
-  warn "Chi-squared test p value for recessive trait probability\t#{pval}"
+  File.open("progeny_number.txt", 'w') do |file|
+    file.puts "mutants\t#{mutant_num}\twildtype\t#{progeny_num - mutant_num}"
+    file.puts "Chi-squared test p value for trait being recessive\t#{pval}"
+  end
   [progeny, mutant_num]
 end
 
