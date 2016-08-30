@@ -178,6 +178,8 @@ while n <= pop_num
       wt_num = bulk_num
     end
 
+    # indices for both groups are stored in array
+    indices = { :wt => [], :mut => []}
     [:wt, :mut].each do | group |
       dir = cwd + "/pool_" + group.to_s
       FileUtils.mkdir_p dir
@@ -185,6 +187,7 @@ while n <= pop_num
       # counter for number pooled
       i = 0
       progeny[group].each_key do | number |
+        indices[group] << number
         sample = group.to_s + "_progeny_" + number.to_s
         [:male, :female].each do | type |
           out_fasta = File.open(sample + type.to_s + '.fas', 'w')
@@ -206,6 +209,40 @@ while n <= pop_num
         break if group == :wt and i >= wt_num
       end
     end
+
+    # setting error sampling
+    if error_num > 0
+      # select files to swap or replace
+      file_ids = { :wt => [], :mut => []}
+      indices.each_key do | phenotype |
+        indices[phenotype].sample(error_num).each do | x |
+          file_ids[phenotype] << phenotype + '_progeny_' + x + 'male.fas'
+          file_ids[phenotype] << phenotype + '_progeny_' + x + 'female.fas'
+        end
+      end
+
+      # now replace or swap files
+      FileUtils.chdir(cwd)
+      if error_type == 'replace'
+        file_ids[:mut].each do | file_name |
+          puts "ls ./pool_mut/#{file_name}"
+          %x[rm ./pool_mut/#{file_name}]
+        end
+        file_ids[:wt].each do | file_name |
+          puts "ls ./pool_wt/#{file_name}"
+          %x[mv ./pool_wt/#{file_name} ./pool_mut/]
+        end
+      else # if error_type == 'swap'
+        file_ids.each_key do | phenotype |
+          other = phenotype == :wt ? :mut : :wt
+          file_ids[:mut].each do | file_name |
+            %x[mv ./pool_#{phenotype}/#{file_name} ./pool_#{other}]
+            %x[mv ./pool_#{phenotype}/#{file_name} ./pool_#{other}]
+          end
+        end
+      end
+    end
+
   end
 
   # increment bulk pop number
