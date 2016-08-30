@@ -165,19 +165,19 @@ while n <= pop_num
     file.write progeny.to_yaml
   end
 
-  # set mutant number as individuals to pool if bulk_num is nil
-  bulk_num = mutant_num if bulk_num == nil
-
-  # calculating error number and setting additional wt individuals to choose
-  # if replace method is used to create sampling error
-  error_num = (bulk_num * error_frac).ceil
-  if error_type == 'replace' and error_num > 0
-    wt_num = bulk_num + error_num
-  else
-    wt_num = bulk_num
-  end
-
   if generate_seqs
+    # set mutant number as individuals to pool if bulk_num is nil
+    bulk_num = mutant_num if bulk_num == nil
+
+    # calculating error number and setting additional wt individuals to choose
+    # if replace method is used to create sampling error
+    error_num = (bulk_num * error_frac).ceil
+    if error_type == 'replace' and error_num > 0
+      wt_num = bulk_num + error_num
+    else
+      wt_num = bulk_num
+    end
+
     [:wt, :mut].each do | group |
       dir = cwd + "/pool_" + group.to_s
       FileUtils.mkdir_p dir
