@@ -25,6 +25,14 @@ progeny: 48
 # default it will be one
 pop_num: 10
 
+# percent mis-phenotyping or sampling error fraction
+error: 0.1
+
+# way of mis-phenotyping or sampling error (two ways)
+# swap = swapping wt and mutant between bulks
+# replace = replacing mutant with a wt in mutant bulk only
+error_type: 'replace'
+
 # mutation position
 mutation:
   Chr3: 1405085
