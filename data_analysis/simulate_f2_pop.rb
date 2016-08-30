@@ -49,7 +49,7 @@ mutation = pars['mutation']
 generate_seqs = pars['generate_seqs']
 
 # number of bulk population to simulate
-if pars['pop_num']
+if pars.key?('pop_num')
   pop_num = pars['pop_num']
 else
   pop_num = 1
@@ -152,10 +152,12 @@ def get_recomb_progeny(chrs, gametes, mutation, progeny_num)
 end
 
 i = 1
+puts "Number of bulk populations\t#{pop_num}"
 while i <= pop_num
-  cwd = indir + "/bulk_pop_" + i
-  FileUtils.mkdir_p dir
-  FileUtils.chdir(dir)
+  puts "current bulk population\t#{i}"
+  cwd = indir + "/bulk_pop_" + i.to_s
+  FileUtils.mkdir_p cwd
+  FileUtils.chdir(cwd)
   gametes = get_recomb_gametes(chrs, xovers, markers)
   progeny, mutant_num = get_recomb_progeny(chrs, gametes, mutation, progeny_num)
   File.open("selected_progeny.yml", 'w') do |file|
