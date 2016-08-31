@@ -243,6 +243,19 @@ while n <= pop_num
       end
     end
 
+    # write abundance files for GemSim
+    [:wt, :mut].each do | group |
+      dir = 'pool_' + group.to_s
+      files = Dir[dir + '/*.fas']
+      files.map { |x| x.gsub(/^#{dir}\//, '') }
+      filename = 'abundance_' + dir + '.txt'
+      File.open(filename, 'w') do |outfile|
+        files.each do | name |
+          outfile.puts "#{name}\t1"
+        end
+      end
+    end
+
   end
 
   # increment bulk pop number
