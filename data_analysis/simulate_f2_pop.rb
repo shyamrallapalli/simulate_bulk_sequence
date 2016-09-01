@@ -216,8 +216,8 @@ while n <= pop_num
       file_ids = { :wt => [], :mut => []}
       indices.each_key do | phenotype |
         indices[phenotype].sample(error_num).each do | x |
-          file_ids[phenotype] << phenotype + '_progeny_' + x + 'male.fas'
-          file_ids[phenotype] << phenotype + '_progeny_' + x + 'female.fas'
+          file_ids[phenotype] << phenotype.to_s + '_progeny_' + x.to_s + 'male.fas'
+          file_ids[phenotype] << phenotype.to_s + '_progeny_' + x.to_s + 'female.fas'
         end
       end
 
@@ -225,18 +225,15 @@ while n <= pop_num
       FileUtils.chdir(cwd)
       if error_type == 'replace'
         file_ids[:mut].each do | file_name |
-          puts "ls ./pool_mut/#{file_name}"
           %x[rm ./pool_mut/#{file_name}]
         end
         file_ids[:wt].each do | file_name |
-          puts "ls ./pool_wt/#{file_name}"
           %x[mv ./pool_wt/#{file_name} ./pool_mut/]
         end
       else # if error_type == 'swap'
         file_ids.each_key do | phenotype |
           other = phenotype == :wt ? :mut : :wt
-          file_ids[:mut].each do | file_name |
-            %x[mv ./pool_#{phenotype}/#{file_name} ./pool_#{other}]
+          file_ids[phenotype].each do | file_name |
             %x[mv ./pool_#{phenotype}/#{file_name} ./pool_#{other}]
           end
         end
@@ -247,7 +244,7 @@ while n <= pop_num
     [:wt, :mut].each do | group |
       dir = 'pool_' + group.to_s
       files = Dir[dir + '/*.fas']
-      files.map { |x| x.gsub(/^#{dir}\//, '') }
+      files.map! { |x| x.gsub(/^#{dir}\//, '') }
       filename = 'abundance_' + dir + '.txt'
       File.open(filename, 'w') do |outfile|
         files.each do | name |
